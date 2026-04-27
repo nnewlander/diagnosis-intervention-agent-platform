@@ -1,0 +1,2 @@
+﻿total_cases,task_type_hit_rate,primary_task_type_hit_rate,json_structure_completeness_rate,slot_student_id_coverage_rate,slot_knowledge_points_coverage_rate,need_clarify_trigger_rate,diagnosis_non_empty_rate,final_response_non_empty_rate,recommended_packages_non_empty_rate,task_type_eval_cases
+90,0.2413793103448276,0.2413793103448276,1.0,0.0,0.2,1.0,1.0,1.0,1.0,58

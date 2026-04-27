@@ -1,0 +1,33 @@
+{
+  "full_scale_assumption": {
+    "teacher_history_dialogs": 32000,
+    "student_structured_rows_total": 12600,
+    "historical_intervention_cases": 3600,
+    "assignment_package_catalog": 1200,
+    "execution_logs_for_replay": 4000,
+    "high_quality_structured_samples": 2800,
+    "evaluation_requests": 900,
+    "reused_rag_source_subset": 4200,
+    "reused_kg_source_subset": 2600
+  },
+  "current_10pct_package": {
+    "teacher_history_dialogs": 3200,
+    "student_profiles": 160,
+    "class_student_map": 140,
+    "practice_submissions": 720,
+    "student_mastery_snapshots": 240,
+    "intervention_feedback": 171,
+    "historical_intervention_cases": 360,
+    "assignment_package_catalog": 120,
+    "execution_logs_for_replay": 400,
+    "high_quality_structured_samples": 280,
+    "evaluation_requests": 90,
+    "reused_rag_source_subset": 420,
+    "reused_kg_source_subset": 260
+  },
+  "notes": [
+    "项目一文档里“1万多条结构化学情数据”按多张 MySQL 表合计理解，因此 10% 包拆成学生画像、班级关系、提交记录、掌握快照四类。",
+    "项目二与项目三的数据未直接全量拷贝，而是抽取与 Agent 诊断/干预链路最相关的原始子集作为复用输入。",
+    "结构化样本主要用于 state 对齐、路由验证与小规模 LoRA 对齐，不代表大规模训练集。"
+  ]
+}

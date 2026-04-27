@@ -1,0 +1,15 @@
+{
+  "project1_name": "核桃智能教学诊断与干预 Agent 平台",
+  "integration_strategy": {
+    "RAG_project2": "提供教师技术问答、课堂讲法、FAQ直达、历史工单经验",
+    "KG_project3": "提供知识点-报错-解决方案关系追溯与图查询候选实体",
+    "MySQL_student_data": "提供学生画像、作业提交、知识点掌握快照、班级关系",
+    "Historical_intervention": "提供干预模板、教师反馈、练习下发经验"
+  },
+  "reused_project2_counts": {
+    "rag_subset_records": 420
+  },
+  "reused_project3_counts": {
+    "kg_subset_records": 260
+  }
+}

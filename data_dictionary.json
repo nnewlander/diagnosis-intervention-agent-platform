@@ -1,0 +1,42 @@
+{
+  "raw_teacher_support_dialogs_10pct.jsonl": {
+    "request_id": "请求ID",
+    "raw_request": "教师原始请求",
+    "conversation_turns": "多轮上下文",
+    "historical_task_hint": "历史任务类型标签，仅供复现参考",
+    "linked_rag_source_ids": "关联的项目二复用源ID",
+    "linked_kg_source_ids": "关联的项目三复用源ID",
+    "linked_mysql_submission_ids": "关联的作业提交证据",
+    "noise_flags": "脏数据/歧义标记"
+  },
+  "student_profiles_10pct.csv": {
+    "student_id": "学生ID",
+    "student_name_masked": "脱敏后的学生名",
+    "primary_course_module": "主课程阶段",
+    "learning_style_hint": "学习风格提示",
+    "attention_risk_level": "课堂关注风险"
+  },
+  "practice_submissions_10pct.jsonl": {
+    "submitted_code": "原始提交代码",
+    "judge_status": "判题状态",
+    "error_type": "报错类型",
+    "teacher_comment_raw": "教师原始批注"
+  },
+  "student_mastery_snapshots_10pct.jsonl": {
+    "weak_knowledge_points": "薄弱知识点",
+    "mastery_level": "掌握度",
+    "evidence_submission_ids": "证据提交列表"
+  },
+  "raw_intervention_cases_10pct.jsonl": {
+    "observed_signals": "观察到的信号",
+    "evidence_refs": "证据来源聚合",
+    "recommended_actions_raw": "原始干预动作描述",
+    "recommended_package_ids": "推荐补练包"
+  },
+  "high_quality_structured_seed_10pct.jsonl": {
+    "expected_state.current_task_type": "标准化后的任务类型",
+    "expected_state.key_knowledge_points": "关键知识点",
+    "expected_state.evidence_sources": "推荐证据来源",
+    "expected_state.need_clarify_fields": "需追问字段"
+  }
+}

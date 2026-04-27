@@ -1,0 +1,16 @@
+file_name,rows,description
+raw_teacher_support_dialogs_10pct.jsonl,3200,教师历史请求与多轮对话原文，含歧义表达、缺字段、技术问答/诊断/干预/下发混合场景
+student_profiles_10pct.csv,160,学生画像主表，供 MySQL 学情查询节点使用
+class_student_map_10pct.csv,140,班级-学生关系表
+practice_submissions_10pct.jsonl,720,作业/练习提交原始记录，含代码、判题状态、报错类型
+student_mastery_snapshots_10pct.jsonl,240,知识点掌握快照，适合做诊断证据
+raw_intervention_cases_10pct.jsonl,360,历史干预案例与教师反馈前态
+intervention_feedback_10pct.csv,171,干预后教师反馈
+raw_assignment_package_catalog_10pct.jsonl,120,练习包目录与目标知识点
+raw_execution_logs_10pct.jsonl,400,任务执行/节点回放日志
+reused_project2_rag_subset_10pct.jsonl,420,复用自项目二的 RAG 原始子集
+reused_project3_kg_subset_10pct.jsonl,260,复用自项目三的 KG 原始子集
+high_quality_structured_seed_10pct.jsonl,280,高质量 state 对齐/路由验证/LoRA 对齐样本
+agent_eval_requests_10pct.jsonl,90,评测集请求，覆盖意图、槽位、路由与端到端完成度
+source_integration_manifest.json,1,项目一与项目二/三/学情/干预数据的整合方式
+scale_assumption.json,1,全量与10%映射说明

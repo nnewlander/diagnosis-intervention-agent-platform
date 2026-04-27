@@ -1,0 +1,26 @@
+{
+  "request_id": "REQ-00001",
+  "created_at": "2025-10-08T20:40",
+  "channel": "教学支持群",
+  "campus_region": "西南",
+  "teacher_role": "教研老师",
+  "class_id": "CLS-PYB-022",
+  "student_id": null,
+  "course_module": "Python基础",
+  "raw_request": "作业发布 这个点学生总混淆，想找一个更好讲的课堂说法。",
+  "conversation_turns": [
+    {
+      "speaker": "林老师",
+      "time": "2025-10-08T20:40",
+      "text": "作业发布 这个点学生总混淆，想找一个更好讲的课堂说法。"
+    }
+  ],
+  "historical_task_hint": "教学问答",
+  "linked_rag_source_ids": [
+    "RAGREF-DOC-0018"
+  ],
+  "linked_kg_source_ids": [],
+  "linked_mysql_submission_ids": [],
+  "status": "resolved",
+  "noise_flags": []
+}

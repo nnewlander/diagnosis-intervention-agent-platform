@@ -1,0 +1,45 @@
+{
+  "case_id": "INT-0001",
+  "created_at": "2025-09-25T07:13",
+  "teacher_name": "吴老师",
+  "teacher_role": "主讲老师",
+  "class_id": "CLS-PYB-022",
+  "student_id": "STU-0127",
+  "course_module": "Python基础",
+  "raw_case_note": "最近两次作业里 周同学 都在字符串、作品提交出问题，老师经验上怀疑不是不会，而是排查顺序乱了。",
+  "observed_signals": [
+    "讲解后短期提升明显但回落",
+    "重复报同类错误",
+    "缺少最小复现习惯"
+  ],
+  "weak_knowledge_points": [
+    "字符串",
+    "作品提交"
+  ],
+  "evidence_refs": {
+    "mysql_submission_ids": [
+      "SUB-00235",
+      "SUB-00339"
+    ],
+    "rag_source_ids": [
+      "TKT-03096",
+      "TKT-03805"
+    ],
+    "kg_source_ids": [
+      "KPAGE-0083",
+      "ERR-0055",
+      "FAQ-0143"
+    ]
+  },
+  "intervention_goal": "先稳定基础概念，再提升独立排错能力",
+  "recommended_actions_raw": "先讲 trigger 条件和反例，再安排分层补练，次日课堂前抽查。",
+  "recommended_package_ids": [
+    "PKG-0071"
+  ],
+  "follow_up_days": 7,
+  "teacher_acceptance": "accepted",
+  "noise_flags": [
+    "evidence_conflict",
+    "missing_student_context"
+  ]
+}
