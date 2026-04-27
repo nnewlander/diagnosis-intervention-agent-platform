@@ -221,17 +221,75 @@ python scripts/eval_offline.py
 
 LangGraph 节点只通过 adapter 调用，不直接读取底层文件。
 
+## 内部 Evidence Schema
+
+内部统一证据对象定义在 `app/models/evidence.py`，用于隔离 graph 与外部接口字段差异：
+
+- `RAGEvidenceItem`: `source_id/title/snippet/score/source_type/metadata`
+- `KGEvidenceItem`: `entity/entity_type/relation/target/evidence/score/metadata`
+- `StudentEvidenceBundle`: 学生画像、提交摘要、薄弱点、错误分布、干预反馈
+- `PackageRecommendationItem`: `package_id/package_name/reason/difficulty_level`
+
+这保证 local 与 remote 最终都回到同一内部格式。
+
+## 为什么需要 Response Mapper
+
+真实服务返回字段经常不一致，例如：
+
+- RAG 可能返回 `hits/results/items`
+- KG 可能返回 `records/results/paths`
+
+Mapper 层（`app/tools/response_mappers/`）负责：
+
+- 字段兼容映射
+- 缺字段兜底
+- 默认值填充
+
+因此 graph 不需要感知 remote 原始字段变化。
+
+## Remote Contract Validation
+
+`app/tools/contracts.py` 定义 remote 输入/输出 contract（Pydantic）：
+
+- 先校验请求 payload
+- 再校验 remote 响应结构
+- 校验失败不会让 workflow 崩溃，adapter 返回空结果并在 debug trace 中记录 validation 错误摘要
+
 ## 项目二 / 项目三接入说明
 
 - 项目二（RAG）：
   1. 设置 `RAG_PROVIDER=remote`
   2. 配置 `RAG_API_BASE` 与可选 `RAG_API_KEY`
   3. 在 `RemoteRAGAdapter.search` 中按真实接口协议补齐 payload/response mapping
+  4. 若字段变化，只改 `RAGResponseMapper`，无需改 graph
 
 - 项目三（KG）：
   1. 设置 `KG_PROVIDER=remote`
   2. 配置 `KG_API_BASE` 与可选 `KG_API_KEY`
   3. 在 `RemoteKGAdapter.search` 对接真实 HTTP 或补齐 Neo4j/Cypher 查询实现
+  4. 若字段变化，只改 `KGResponseMapper`，无需改 graph
+
+## Mock Remote Services 启动
+
+1) 启动 mock RAG：
+
+```bash
+python scripts/run_mock_rag.py
+```
+
+2) 启动 mock KG：
+
+```bash
+python scripts/run_mock_kg.py
+```
+
+3) 运行 remote smoke：
+
+```bash
+python scripts/smoke_test_remote.py
+```
+
+该脚本会切换 `RAG_PROVIDER=remote` 和 `KG_PROVIDER=remote`，并打印 evidence 示例，便于联调前验证 mapper 和 contract 行为。
 
 ## SQLite 初始化步骤
 
@@ -261,13 +319,9 @@ python scripts/build_local_sqlite.py
   - 在 `RemoteKGAdapter` 的 TODO 位置加入 driver 初始化、Cypher 模板和结果归一化
   - 保持 `search(query, keywords, top_k)` 接口不变
 
-## 如何替换 mock 为真实服务
+## 后续替换成真实项目二/三服务
 
-优先保持 `app/tools/retrievers.py` 的函数签名稳定，再替换内部实现：
-
-- `retrieve_rag` -> 项目二 RAG 服务
-- `retrieve_kg` -> 项目三 KG 服务
-- `retrieve_mysql` -> 真实数据库查询层
-- `retrieve_packages` -> 练习包推荐策略服务
-
-这样可以最大限度保证 LangGraph 节点和 API 协议不变，降低集成风险。
+- 优先保持 adapter 对外接口不变（`search()/resolve_student()/load_student_evidence()`）。
+- 真实接口字段变化优先改 mapper，不动 graph。
+- 协议升级优先改 contract，校验逻辑集中在 adapter 入口。
+- 联调阶段建议先跑 `scripts/smoke_test_remote.py` + `tests/test_remote_mappers.py`。

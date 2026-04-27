@@ -1,5 +1,44 @@
 from app.core.config import settings
 from app.graph.workflow import build_agent_graph
+from app.tools.kg_adapter import get_kg_adapter
+from app.tools.rag_adapter import get_rag_adapter
+from app.tools.student_data_adapter import get_student_data_adapter
+from scripts.build_local_sqlite import build_local_sqlite
+
+
+def _run(request_text: str) -> dict:
+    graph = build_agent_graph()
+    return graph.invoke({"request_text": request_text})
+
+
+def test_local_provider_mode_workflow_runs(monkeypatch):
+    monkeypatch.setattr(settings, "RAG_PROVIDER", "local")
+    monkeypatch.setattr(settings, "KG_PROVIDER", "local")
+    monkeypatch.setattr(settings, "STUDENT_DATA_PROVIDER", "local_csv_jsonl")
+    state = _run("请做学情诊断：student_id:STU-0001 最近几次作业表现如何？")
+    assert state["primary_task_type"] == "diagnosis"
+    assert "debug_trace" in state
+    assert "evidence_summary" in state
+
+
+def test_sqlite_provider_mode_student_query_runs(monkeypatch):
+    db_path = build_local_sqlite()
+    monkeypatch.setattr(settings, "SQLITE_DB_PATH", str(db_path.relative_to(settings.PROJECT_ROOT)))
+    monkeypatch.setattr(settings, "STUDENT_DATA_PROVIDER", "sqlite")
+    state = _run("请诊断 student_id:STU-0001 的函数问题")
+    assert "mysql_evidence" in state
+    assert "profile_summary" in state["mysql_evidence"]
+
+
+def test_provider_switch_logic(monkeypatch):
+    monkeypatch.setattr(settings, "RAG_PROVIDER", "remote")
+    monkeypatch.setattr(settings, "KG_PROVIDER", "remote")
+    monkeypatch.setattr(settings, "STUDENT_DATA_PROVIDER", "local_csv_jsonl")
+    assert get_rag_adapter().provider_name == "remote"
+    assert get_kg_adapter().provider_name == "remote"
+    assert get_student_data_adapter().provider_name == "local_csv_jsonl"
+from app.core.config import settings
+from app.graph.workflow import build_agent_graph
 from app.tools.kg_adapter import RemoteKGAdapter, get_kg_adapter
 from app.tools.rag_adapter import RemoteRAGAdapter, get_rag_adapter
 from app.tools.student_data_adapter import get_student_data_adapter

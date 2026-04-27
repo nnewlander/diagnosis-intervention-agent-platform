@@ -10,6 +10,10 @@
     "diagnosis_non_empty_rate": 1.0,
     "final_response_non_empty_rate": 1.0,
     "recommended_packages_non_empty_rate": 1.0,
+    "diagnosis_quality_avg": 0.6666666666666659,
+    "intervention_quality_avg": 0.75,
+    "evidence_usage_avg": 0.4925925925925929,
+    "conservative_mode_reasonable_rate": 0.0,
     "task_type_eval_cases": 58
   },
   "details": [
@@ -25,7 +29,11 @@
       "slot_student_id_hit": false,
       "slot_knowledge_points_hit": false,
       "need_clarify_triggered": true,
-      "recommended_packages_non_empty": true
+      "recommended_packages_non_empty": true,
+      "diagnosis_quality_score": 0.6666666666666666,
+      "intervention_quality_score": 0.75,
+      "evidence_usage_score": 0.3333333333333333,
+      "conservative_mode_reasonable": false
     },
     {
       "case_id": 2,
@@ -39,7 +47,11 @@
       "slot_student_id_hit": false,
       "slot_knowledge_points_hit": false,
       "need_clarify_triggered": true,
-      "recommended_packages_non_empty": true
+      "recommended_packages_non_empty": true,
+      "diagnosis_quality_score": 0.6666666666666666,
+      "intervention_quality_score": 0.75,
+      "evidence_usage_score": 0.3333333333333333,
+      "conservative_mode_reasonable": false
     },
     {
       "case_id": 3,
@@ -53,7 +65,11 @@
       "slot_student_id_hit": false,
       "slot_knowledge_points_hit": false,
       "need_clarify_triggered": true,
-      "recommended_packages_non_empty": true
+      "recommended_packages_non_empty": true,
+      "diagnosis_quality_score": 0.6666666666666666,
+      "intervention_quality_score": 0.75,
+      "evidence_usage_score": 0.3333333333333333,
+      "conservative_mode_reasonable": false
     },
     {
       "case_id": 4,
@@ -67,7 +83,11 @@
       "slot_student_id_hit": false,
       "slot_knowledge_points_hit": false,
       "need_clarify_triggered": true,
-      "recommended_packages_non_empty": true
+      "recommended_packages_non_empty": true,
+      "diagnosis_quality_score": 0.6666666666666666,
+      "intervention_quality_score": 0.75,
+      "evidence_usage_score": 0.3333333333333333,
+      "conservative_mode_reasonable": false
     },
     {
       "case_id": 5,
@@ -81,7 +101,11 @@
       "slot_student_id_hit": false,
       "slot_knowledge_points_hit": true,
       "need_clarify_triggered": true,
-      "recommended_packages_non_empty": true
+      "recommended_packages_non_empty": true,
+      "diagnosis_quality_score": 0.6666666666666666,
+      "intervention_quality_score": 0.75,
+      "evidence_usage_score": 0.6666666666666666,
+      "conservative_mode_reasonable": false
     },
     {
       "case_id": 6,
@@ -95,7 +119,11 @@
       "slot_student_id_hit": false,
       "slot_knowledge_points_hit": false,
       "need_clarify_triggered": true,
-      "recommended_packages_non_empty": true
+      "recommended_packages_non_empty": true,
+      "diagnosis_quality_score": 0.6666666666666666,
+      "intervention_quality_score": 0.75,
+      "evidence_usage_score": 0.3333333333333333,
+      "conservative_mode_reasonable": false
     },
     {
       "case_id": 7,
@@ -109,7 +137,11 @@
       "slot_student_id_hit": false,
       "slot_knowledge_points_hit": false,
       "need_clarify_triggered": true,
-      "recommended_packages_non_empty": true
+      "recommended_packages_non_empty": true,
+      "diagnosis_quality_score": 0.6666666666666666,
+      "intervention_quality_score": 0.75,
+      "evidence_usage_score": 0.3333333333333333,
+      "conservative_mode_reasonable": false
     },
     {
       "case_id": 8,
@@ -123,7 +155,11 @@
       "slot_student_id_hit": false,
       "slot_knowledge_points_hit": false,
       "need_clarify_triggered": true,
-      "recommended_packages_non_empty": true
+      "recommended_packages_non_empty": true,
+      "diagnosis_quality_score": 0.6666666666666666,
+      "intervention_quality_score": 0.75,
+      "evidence_usage_score": 0.6666666666666666,
+      "conservative_mode_reasonable": false
     },
     {
       "case_id": 9,
@@ -137,7 +173,11 @@
       "slot_student_id_hit": false,
       "slot_knowledge_points_hit": false,
       "need_clarify_triggered": true,
-      "recommended_packages_non_empty": true
+      "recommended_packages_non_empty": true,
+      "diagnosis_quality_score": 0.6666666666666666,
+      "intervention_quality_score": 0.75,
+      "evidence_usage_score": 0.3333333333333333,
+      "conservative_mode_reasonable": false
     },
     {
       "case_id": 10,
@@ -151,7 +191,11 @@
       "slot_student_id_hit": false,
       "slot_knowledge_points_hit": false,
       "need_clarify_triggered": true,
-      "recommended_packages_non_empty": true
+      "recommended_packages_non_empty": true,
+      "diagnosis_quality_score": 0.6666666666666666,
+      "intervention_quality_score": 0.75,
+      "evidence_usage_score": 0.3333333333333333,
+      "conservative_mode_reasonable": false
     },
     {
       "case_id": 11,
@@ -165,7 +209,11 @@
       "slot_student_id_hit": false,
       "slot_knowledge_points_hit": false,
       "need_clarify_triggered": true,
-      "recommended_packages_non_empty": true
+      "recommended_packages_non_empty": true,
+      "diagnosis_quality_score": 0.6666666666666666,
+      "intervention_quality_score": 0.75,
+      "evidence_usage_score": 0.3333333333333333,
+      "conservative_mode_reasonable": false
     },
     {
       "case_id": 12,
@@ -179,7 +227,11 @@
       "slot_student_id_hit": false,
       "slot_knowledge_points_hit": false,
       "need_clarify_triggered": true,
-      "recommended_packages_non_empty": true
+      "recommended_packages_non_empty": true,
+      "diagnosis_quality_score": 0.6666666666666666,
+      "intervention_quality_score": 0.75,
+      "evidence_usage_score": 0.3333333333333333,
+      "conservative_mode_reasonable": false
     },
     {
       "case_id": 13,
@@ -193,7 +245,11 @@
       "slot_student_id_hit": false,
       "slot_knowledge_points_hit": true,
       "need_clarify_triggered": true,
-      "recommended_packages_non_empty": true
+      "recommended_packages_non_empty": true,
+      "diagnosis_quality_score": 0.6666666666666666,
+      "intervention_quality_score": 0.75,
+      "evidence_usage_score": 1.0,
+      "conservative_mode_reasonable": false
     },
     {
       "case_id": 14,
@@ -207,7 +263,11 @@
       "slot_student_id_hit": false,
       "slot_knowledge_points_hit": false,
       "need_clarify_triggered": true,
-      "recommended_packages_non_empty": true
+      "recommended_packages_non_empty": true,
+      "diagnosis_quality_score": 0.6666666666666666,
+      "intervention_quality_score": 0.75,
+      "evidence_usage_score": 0.3333333333333333,
+      "conservative_mode_reasonable": false
     },
     {
       "case_id": 15,
@@ -221,7 +281,11 @@
       "slot_student_id_hit": false,
       "slot_knowledge_points_hit": false,
       "need_clarify_triggered": true,
-      "recommended_packages_non_empty": true
+      "recommended_packages_non_empty": true,
+      "diagnosis_quality_score": 0.6666666666666666,
+      "intervention_quality_score": 0.75,
+      "evidence_usage_score": 0.3333333333333333,
+      "conservative_mode_reasonable": false
     },
     {
       "case_id": 16,
@@ -235,7 +299,11 @@
       "slot_student_id_hit": false,
       "slot_knowledge_points_hit": false,
       "need_clarify_triggered": true,
-      "recommended_packages_non_empty": true
+      "recommended_packages_non_empty": true,
+      "diagnosis_quality_score": 0.6666666666666666,
+      "intervention_quality_score": 0.75,
+      "evidence_usage_score": 0.6666666666666666,
+      "conservative_mode_reasonable": false
     },
     {
       "case_id": 17,
@@ -249,7 +317,11 @@
       "slot_student_id_hit": false,
       "slot_knowledge_points_hit": true,
       "need_clarify_triggered": true,
-      "recommended_packages_non_empty": true
+      "recommended_packages_non_empty": true,
+      "diagnosis_quality_score": 0.6666666666666666,
+      "intervention_quality_score": 0.75,
+      "evidence_usage_score": 1.0,
+      "conservative_mode_reasonable": false
     },
     {
       "case_id": 18,
@@ -263,7 +335,11 @@
       "slot_student_id_hit": false,
       "slot_knowledge_points_hit": true,
       "need_clarify_triggered": true,
-      "recommended_packages_non_empty": true
+      "recommended_packages_non_empty": true,
+      "diagnosis_quality_score": 0.6666666666666666,
+      "intervention_quality_score": 0.75,
+      "evidence_usage_score": 1.0,
+      "conservative_mode_reasonable": false
     },
     {
       "case_id": 19,
@@ -277,7 +353,11 @@
       "slot_student_id_hit": false,
       "slot_knowledge_points_hit": false,
       "need_clarify_triggered": true,
-      "recommended_packages_non_empty": true
+      "recommended_packages_non_empty": true,
+      "diagnosis_quality_score": 0.6666666666666666,
+      "intervention_quality_score": 0.75,
+      "evidence_usage_score": 0.3333333333333333,
+      "conservative_mode_reasonable": false
     },
     {
       "case_id": 20,
@@ -291,7 +371,11 @@
       "slot_student_id_hit": false,
       "slot_knowledge_points_hit": true,
       "need_clarify_triggered": true,
-      "recommended_packages_non_empty": true
+      "recommended_packages_non_empty": true,
+      "diagnosis_quality_score": 0.6666666666666666,
+      "intervention_quality_score": 0.75,
+      "evidence_usage_score": 1.0,
+      "conservative_mode_reasonable": false
     },
     {
       "case_id": 21,
@@ -305,7 +389,11 @@
       "slot_student_id_hit": false,
       "slot_knowledge_points_hit": false,
       "need_clarify_triggered": true,
-      "recommended_packages_non_empty": true
+      "recommended_packages_non_empty": true,
+      "diagnosis_quality_score": 0.6666666666666666,
+      "intervention_quality_score": 0.75,
+      "evidence_usage_score": 0.3333333333333333,
+      "conservative_mode_reasonable": false
     },
     {
       "case_id": 22,
@@ -319,7 +407,11 @@
       "slot_student_id_hit": false,
       "slot_knowledge_points_hit": false,
       "need_clarify_triggered": true,
-      "recommended_packages_non_empty": true
+      "recommended_packages_non_empty": true,
+      "diagnosis_quality_score": 0.6666666666666666,
+      "intervention_quality_score": 0.75,
+      "evidence_usage_score": 0.3333333333333333,
+      "conservative_mode_reasonable": false
     },
     {
       "case_id": 23,
@@ -333,7 +425,11 @@
       "slot_student_id_hit": false,
       "slot_knowledge_points_hit": true,
       "need_clarify_triggered": true,
-      "recommended_packages_non_empty": true
+      "recommended_packages_non_empty": true,
+      "diagnosis_quality_score": 0.6666666666666666,
+      "intervention_quality_score": 0.75,
+      "evidence_usage_score": 1.0,
+      "conservative_mode_reasonable": false
     },
     {
       "case_id": 24,
@@ -347,7 +443,11 @@
       "slot_student_id_hit": false,
       "slot_knowledge_points_hit": false,
       "need_clarify_triggered": true,
-      "recommended_packages_non_empty": true
+      "recommended_packages_non_empty": true,
+      "diagnosis_quality_score": 0.6666666666666666,
+      "intervention_quality_score": 0.75,
+      "evidence_usage_score": 0.3333333333333333,
+      "conservative_mode_reasonable": false
     },
     {
       "case_id": 25,
@@ -361,7 +461,11 @@
       "slot_student_id_hit": false,
       "slot_knowledge_points_hit": false,
       "need_clarify_triggered": true,
-      "recommended_packages_non_empty": true
+      "recommended_packages_non_empty": true,
+      "diagnosis_quality_score": 0.6666666666666666,
+      "intervention_quality_score": 0.75,
+      "evidence_usage_score": 0.3333333333333333,
+      "conservative_mode_reasonable": false
     },
     {
       "case_id": 26,
@@ -375,7 +479,11 @@
       "slot_student_id_hit": false,
       "slot_knowledge_points_hit": false,
       "need_clarify_triggered": true,
-      "recommended_packages_non_empty": true
+      "recommended_packages_non_empty": true,
+      "diagnosis_quality_score": 0.6666666666666666,
+      "intervention_quality_score": 0.75,
+      "evidence_usage_score": 0.3333333333333333,
+      "conservative_mode_reasonable": false
     },
     {
       "case_id": 27,
@@ -389,7 +497,11 @@
       "slot_student_id_hit": false,
       "slot_knowledge_points_hit": false,
       "need_clarify_triggered": true,
-      "recommended_packages_non_empty": true
+      "recommended_packages_non_empty": true,
+      "diagnosis_quality_score": 0.6666666666666666,
+      "intervention_quality_score": 0.75,
+      "evidence_usage_score": 0.3333333333333333,
+      "conservative_mode_reasonable": false
     },
     {
       "case_id": 28,
@@ -403,7 +515,11 @@
       "slot_student_id_hit": false,
       "slot_knowledge_points_hit": false,
       "need_clarify_triggered": true,
-      "recommended_packages_non_empty": true
+      "recommended_packages_non_empty": true,
+      "diagnosis_quality_score": 0.6666666666666666,
+      "intervention_quality_score": 0.75,
+      "evidence_usage_score": 0.3333333333333333,
+      "conservative_mode_reasonable": false
     },
     {
       "case_id": 29,
@@ -417,7 +533,11 @@
       "slot_student_id_hit": false,
       "slot_knowledge_points_hit": true,
       "need_clarify_triggered": true,
-      "recommended_packages_non_empty": true
+      "recommended_packages_non_empty": true,
+      "diagnosis_quality_score": 0.6666666666666666,
+      "intervention_quality_score": 0.75,
+      "evidence_usage_score": 1.0,
+      "conservative_mode_reasonable": false
     },
     {
       "case_id": 30,
@@ -431,7 +551,11 @@
       "slot_student_id_hit": false,
       "slot_knowledge_points_hit": false,
       "need_clarify_triggered": true,
-      "recommended_packages_non_empty": true
+      "recommended_packages_non_empty": true,
+      "diagnosis_quality_score": 0.6666666666666666,
+      "intervention_quality_score": 0.75,
+      "evidence_usage_score": 0.3333333333333333,
+      "conservative_mode_reasonable": false
     },
     {
       "case_id": 31,
@@ -445,7 +569,11 @@
       "slot_student_id_hit": false,
       "slot_knowledge_points_hit": false,
       "need_clarify_triggered": true,
-      "recommended_packages_non_empty": true
+      "recommended_packages_non_empty": true,
+      "diagnosis_quality_score": 0.6666666666666666,
+      "intervention_quality_score": 0.75,
+      "evidence_usage_score": 0.3333333333333333,
+      "conservative_mode_reasonable": false
     },
     {
       "case_id": 32,
@@ -459,7 +587,11 @@
       "slot_student_id_hit": false,
       "slot_knowledge_points_hit": false,
       "need_clarify_triggered": true,
-      "recommended_packages_non_empty": true
+      "recommended_packages_non_empty": true,
+      "diagnosis_quality_score": 0.6666666666666666,
+      "intervention_quality_score": 0.75,
+      "evidence_usage_score": 0.3333333333333333,
+      "conservative_mode_reasonable": false
     },
     {
       "case_id": 33,
@@ -473,7 +605,11 @@
       "slot_student_id_hit": false,
       "slot_knowledge_points_hit": false,
       "need_clarify_triggered": true,
-      "recommended_packages_non_empty": true
+      "recommended_packages_non_empty": true,
+      "diagnosis_quality_score": 0.6666666666666666,
+      "intervention_quality_score": 0.75,
+      "evidence_usage_score": 0.3333333333333333,
+      "conservative_mode_reasonable": false
     },
     {
       "case_id": 34,
@@ -487,7 +623,11 @@
       "slot_student_id_hit": false,
       "slot_knowledge_points_hit": false,
       "need_clarify_triggered": true,
-      "recommended_packages_non_empty": true
+      "recommended_packages_non_empty": true,
+      "diagnosis_quality_score": 0.6666666666666666,
+      "intervention_quality_score": 0.75,
+      "evidence_usage_score": 0.3333333333333333,
+      "conservative_mode_reasonable": false
     },
     {
       "case_id": 35,
@@ -501,7 +641,11 @@
       "slot_student_id_hit": false,
       "slot_knowledge_points_hit": true,
       "need_clarify_triggered": true,
-      "recommended_packages_non_empty": true
+      "recommended_packages_non_empty": true,
+      "diagnosis_quality_score": 0.6666666666666666,
+      "intervention_quality_score": 0.75,
+      "evidence_usage_score": 1.0,
+      "conservative_mode_reasonable": false
     },
     {
       "case_id": 36,
@@ -515,7 +659,11 @@
       "slot_student_id_hit": false,
       "slot_knowledge_points_hit": true,
       "need_clarify_triggered": true,
-      "recommended_packages_non_empty": true
+      "recommended_packages_non_empty": true,
+      "diagnosis_quality_score": 0.6666666666666666,
+      "intervention_quality_score": 0.75,
+      "evidence_usage_score": 1.0,
+      "conservative_mode_reasonable": false
     },
     {
       "case_id": 37,
@@ -529,7 +677,11 @@
       "slot_student_id_hit": false,
       "slot_knowledge_points_hit": false,
       "need_clarify_triggered": true,
-      "recommended_packages_non_empty": true
+      "recommended_packages_non_empty": true,
+      "diagnosis_quality_score": 0.6666666666666666,
+      "intervention_quality_score": 0.75,
+      "evidence_usage_score": 0.3333333333333333,
+      "conservative_mode_reasonable": false
     },
     {
       "case_id": 38,
@@ -543,7 +695,11 @@
       "slot_student_id_hit": false,
       "slot_knowledge_points_hit": false,
       "need_clarify_triggered": true,
-      "recommended_packages_non_empty": true
+      "recommended_packages_non_empty": true,
+      "diagnosis_quality_score": 0.6666666666666666,
+      "intervention_quality_score": 0.75,
+      "evidence_usage_score": 0.3333333333333333,
+      "conservative_mode_reasonable": false
     },
     {
       "case_id": 39,
@@ -557,7 +713,11 @@
       "slot_student_id_hit": false,
       "slot_knowledge_points_hit": false,
       "need_clarify_triggered": true,
-      "recommended_packages_non_empty": true
+      "recommended_packages_non_empty": true,
+      "diagnosis_quality_score": 0.6666666666666666,
+      "intervention_quality_score": 0.75,
+      "evidence_usage_score": 0.3333333333333333,
+      "conservative_mode_reasonable": false
     },
     {
       "case_id": 40,
@@ -571,7 +731,11 @@
       "slot_student_id_hit": false,
       "slot_knowledge_points_hit": true,
       "need_clarify_triggered": true,
-      "recommended_packages_non_empty": true
+      "recommended_packages_non_empty": true,
+      "diagnosis_quality_score": 0.6666666666666666,
+      "intervention_quality_score": 0.75,
+      "evidence_usage_score": 1.0,
+      "conservative_mode_reasonable": false
     },
     {
       "case_id": 41,
@@ -585,7 +749,11 @@
       "slot_student_id_hit": false,
       "slot_knowledge_points_hit": true,
       "need_clarify_triggered": true,
-      "recommended_packages_non_empty": true
+      "recommended_packages_non_empty": true,
+      "diagnosis_quality_score": 0.6666666666666666,
+      "intervention_quality_score": 0.75,
+      "evidence_usage_score": 1.0,
+      "conservative_mode_reasonable": false
     },
     {
       "case_id": 42,
@@ -599,7 +767,11 @@
       "slot_student_id_hit": false,
       "slot_knowledge_points_hit": false,
       "need_clarify_triggered": true,
-      "recommended_packages_non_empty": true
+      "recommended_packages_non_empty": true,
+      "diagnosis_quality_score": 0.6666666666666666,
+      "intervention_quality_score": 0.75,
+      "evidence_usage_score": 0.3333333333333333,
+      "conservative_mode_reasonable": false
     },
     {
       "case_id": 43,
@@ -613,7 +785,11 @@
       "slot_student_id_hit": false,
       "slot_knowledge_points_hit": false,
       "need_clarify_triggered": true,
-      "recommended_packages_non_empty": true
+      "recommended_packages_non_empty": true,
+      "diagnosis_quality_score": 0.6666666666666666,
+      "intervention_quality_score": 0.75,
+      "evidence_usage_score": 0.3333333333333333,
+      "conservative_mode_reasonable": false
     },
     {
       "case_id": 44,
@@ -627,7 +803,11 @@
       "slot_student_id_hit": false,
       "slot_knowledge_points_hit": false,
       "need_clarify_triggered": true,
-      "recommended_packages_non_empty": true
+      "recommended_packages_non_empty": true,
+      "diagnosis_quality_score": 0.6666666666666666,
+      "intervention_quality_score": 0.75,
+      "evidence_usage_score": 0.3333333333333333,
+      "conservative_mode_reasonable": false
     },
     {
       "case_id": 45,
@@ -641,7 +821,11 @@
       "slot_student_id_hit": false,
       "slot_knowledge_points_hit": false,
       "need_clarify_triggered": true,
-      "recommended_packages_non_empty": true
+      "recommended_packages_non_empty": true,
+      "diagnosis_quality_score": 0.6666666666666666,
+      "intervention_quality_score": 0.75,
+      "evidence_usage_score": 0.3333333333333333,
+      "conservative_mode_reasonable": false
     },
     {
       "case_id": 46,
@@ -655,7 +839,11 @@
       "slot_student_id_hit": false,
       "slot_knowledge_points_hit": false,
       "need_clarify_triggered": true,
-      "recommended_packages_non_empty": true
+      "recommended_packages_non_empty": true,
+      "diagnosis_quality_score": 0.6666666666666666,
+      "intervention_quality_score": 0.75,
+      "evidence_usage_score": 0.3333333333333333,
+      "conservative_mode_reasonable": false
     },
     {
       "case_id": 47,
@@ -669,7 +857,11 @@
       "slot_student_id_hit": false,
       "slot_knowledge_points_hit": false,
       "need_clarify_triggered": true,
-      "recommended_packages_non_empty": true
+      "recommended_packages_non_empty": true,
+      "diagnosis_quality_score": 0.6666666666666666,
+      "intervention_quality_score": 0.75,
+      "evidence_usage_score": 0.3333333333333333,
+      "conservative_mode_reasonable": false
     },
     {
       "case_id": 48,
@@ -683,7 +875,11 @@
       "slot_student_id_hit": false,
       "slot_knowledge_points_hit": false,
       "need_clarify_triggered": true,
-      "recommended_packages_non_empty": true
+      "recommended_packages_non_empty": true,
+      "diagnosis_quality_score": 0.6666666666666666,
+      "intervention_quality_score": 0.75,
+      "evidence_usage_score": 0.3333333333333333,
+      "conservative_mode_reasonable": false
     },
     {
       "case_id": 49,
@@ -697,7 +893,11 @@
       "slot_student_id_hit": false,
       "slot_knowledge_points_hit": false,
       "need_clarify_triggered": true,
-      "recommended_packages_non_empty": true
+      "recommended_packages_non_empty": true,
+      "diagnosis_quality_score": 0.6666666666666666,
+      "intervention_quality_score": 0.75,
+      "evidence_usage_score": 0.6666666666666666,
+      "conservative_mode_reasonable": false
     },
     {
       "case_id": 50,
@@ -711,7 +911,11 @@
       "slot_student_id_hit": false,
       "slot_knowledge_points_hit": true,
       "need_clarify_triggered": true,
-      "recommended_packages_non_empty": true
+      "recommended_packages_non_empty": true,
+      "diagnosis_quality_score": 0.6666666666666666,
+      "intervention_quality_score": 0.75,
+      "evidence_usage_score": 1.0,
+      "conservative_mode_reasonable": false
     },
     {
       "case_id": 51,
@@ -725,7 +929,11 @@
       "slot_student_id_hit": false,
       "slot_knowledge_points_hit": false,
       "need_clarify_triggered": true,
-      "recommended_packages_non_empty": true
+      "recommended_packages_non_empty": true,
+      "diagnosis_quality_score": 0.6666666666666666,
+      "intervention_quality_score": 0.75,
+      "evidence_usage_score": 0.3333333333333333,
+      "conservative_mode_reasonable": false
     },
     {
       "case_id": 52,
@@ -739,7 +947,11 @@
       "slot_student_id_hit": false,
       "slot_knowledge_points_hit": true,
       "need_clarify_triggered": true,
-      "recommended_packages_non_empty": true
+      "recommended_packages_non_empty": true,
+      "diagnosis_quality_score": 0.6666666666666666,
+      "intervention_quality_score": 0.75,
+      "evidence_usage_score": 1.0,
+      "conservative_mode_reasonable": false
     },
     {
       "case_id": 53,
@@ -753,7 +965,11 @@
       "slot_student_id_hit": false,
       "slot_knowledge_points_hit": true,
       "need_clarify_triggered": true,
-      "recommended_packages_non_empty": true
+      "recommended_packages_non_empty": true,
+      "diagnosis_quality_score": 0.6666666666666666,
+      "intervention_quality_score": 0.75,
+      "evidence_usage_score": 1.0,
+      "conservative_mode_reasonable": false
     },
     {
       "case_id": 54,
@@ -767,7 +983,11 @@
       "slot_student_id_hit": false,
       "slot_knowledge_points_hit": false,
       "need_clarify_triggered": true,
-      "recommended_packages_non_empty": true
+      "recommended_packages_non_empty": true,
+      "diagnosis_quality_score": 0.6666666666666666,
+      "intervention_quality_score": 0.75,
+      "evidence_usage_score": 0.6666666666666666,
+      "conservative_mode_reasonable": false
     },
     {
       "case_id": 55,
@@ -781,7 +1001,11 @@
       "slot_student_id_hit": false,
       "slot_knowledge_points_hit": false,
       "need_clarify_triggered": true,
-      "recommended_packages_non_empty": true
+      "recommended_packages_non_empty": true,
+      "diagnosis_quality_score": 0.6666666666666666,
+      "intervention_quality_score": 0.75,
+      "evidence_usage_score": 0.3333333333333333,
+      "conservative_mode_reasonable": false
     },
     {
       "case_id": 56,
@@ -795,7 +1019,11 @@
       "slot_student_id_hit": false,
       "slot_knowledge_points_hit": false,
       "need_clarify_triggered": true,
-      "recommended_packages_non_empty": true
+      "recommended_packages_non_empty": true,
+      "diagnosis_quality_score": 0.6666666666666666,
+      "intervention_quality_score": 0.75,
+      "evidence_usage_score": 0.3333333333333333,
+      "conservative_mode_reasonable": false
     },
     {
       "case_id": 57,
@@ -809,7 +1037,11 @@
       "slot_student_id_hit": false,
       "slot_knowledge_points_hit": false,
       "need_clarify_triggered": true,
-      "recommended_packages_non_empty": true
+      "recommended_packages_non_empty": true,
+      "diagnosis_quality_score": 0.6666666666666666,
+      "intervention_quality_score": 0.75,
+      "evidence_usage_score": 0.3333333333333333,
+      "conservative_mode_reasonable": false
     },
     {
       "case_id": 58,
@@ -823,7 +1055,11 @@
       "slot_student_id_hit": false,
       "slot_knowledge_points_hit": false,
       "need_clarify_triggered": true,
-      "recommended_packages_non_empty": true
+      "recommended_packages_non_empty": true,
+      "diagnosis_quality_score": 0.6666666666666666,
+      "intervention_quality_score": 0.75,
+      "evidence_usage_score": 0.3333333333333333,
+      "conservative_mode_reasonable": false
     },
     {
       "case_id": 59,
@@ -837,7 +1073,11 @@
       "slot_student_id_hit": false,
       "slot_knowledge_points_hit": false,
       "need_clarify_triggered": true,
-      "recommended_packages_non_empty": true
+      "recommended_packages_non_empty": true,
+      "diagnosis_quality_score": 0.6666666666666666,
+      "intervention_quality_score": 0.75,
+      "evidence_usage_score": 0.3333333333333333,
+      "conservative_mode_reasonable": false
     },
     {
       "case_id": 60,
@@ -851,7 +1091,11 @@
       "slot_student_id_hit": false,
       "slot_knowledge_points_hit": false,
       "need_clarify_triggered": true,
-      "recommended_packages_non_empty": true
+      "recommended_packages_non_empty": true,
+      "diagnosis_quality_score": 0.6666666666666666,
+      "intervention_quality_score": 0.75,
+      "evidence_usage_score": 0.3333333333333333,
+      "conservative_mode_reasonable": false
     },
     {
       "case_id": 61,
@@ -865,7 +1109,11 @@
       "slot_student_id_hit": false,
       "slot_knowledge_points_hit": false,
       "need_clarify_triggered": true,
-      "recommended_packages_non_empty": true
+      "recommended_packages_non_empty": true,
+      "diagnosis_quality_score": 0.6666666666666666,
+      "intervention_quality_score": 0.75,
+      "evidence_usage_score": 0.6666666666666666,
+      "conservative_mode_reasonable": false
     },
     {
       "case_id": 62,
@@ -879,7 +1127,11 @@
       "slot_student_id_hit": false,
       "slot_knowledge_points_hit": false,
       "need_clarify_triggered": true,
-      "recommended_packages_non_empty": true
+      "recommended_packages_non_empty": true,
+      "diagnosis_quality_score": 0.6666666666666666,
+      "intervention_quality_score": 0.75,
+      "evidence_usage_score": 0.3333333333333333,
+      "conservative_mode_reasonable": false
     },
     {
       "case_id": 63,
@@ -893,7 +1145,11 @@
       "slot_student_id_hit": false,
       "slot_knowledge_points_hit": false,
       "need_clarify_triggered": true,
-      "recommended_packages_non_empty": true
+      "recommended_packages_non_empty": true,
+      "diagnosis_quality_score": 0.6666666666666666,
+      "intervention_quality_score": 0.75,
+      "evidence_usage_score": 0.3333333333333333,
+      "conservative_mode_reasonable": false
     },
     {
       "case_id": 64,
@@ -907,7 +1163,11 @@
       "slot_student_id_hit": false,
       "slot_knowledge_points_hit": false,
       "need_clarify_triggered": true,
-      "recommended_packages_non_empty": true
+      "recommended_packages_non_empty": true,
+      "diagnosis_quality_score": 0.6666666666666666,
+      "intervention_quality_score": 0.75,
+      "evidence_usage_score": 0.6666666666666666,
+      "conservative_mode_reasonable": false
     },
     {
       "case_id": 65,
@@ -921,7 +1181,11 @@
       "slot_student_id_hit": false,
       "slot_knowledge_points_hit": false,
       "need_clarify_triggered": true,
-      "recommended_packages_non_empty": true
+      "recommended_packages_non_empty": true,
+      "diagnosis_quality_score": 0.6666666666666666,
+      "intervention_quality_score": 0.75,
+      "evidence_usage_score": 0.3333333333333333,
+      "conservative_mode_reasonable": false
     },
     {
       "case_id": 66,
@@ -935,7 +1199,11 @@
       "slot_student_id_hit": false,
       "slot_knowledge_points_hit": false,
       "need_clarify_triggered": true,
-      "recommended_packages_non_empty": true
+      "recommended_packages_non_empty": true,
+      "diagnosis_quality_score": 0.6666666666666666,
+      "intervention_quality_score": 0.75,
+      "evidence_usage_score": 0.3333333333333333,
+      "conservative_mode_reasonable": false
     },
     {
       "case_id": 67,
@@ -949,7 +1217,11 @@
       "slot_student_id_hit": false,
       "slot_knowledge_points_hit": true,
       "need_clarify_triggered": true,
-      "recommended_packages_non_empty": true
+      "recommended_packages_non_empty": true,
+      "diagnosis_quality_score": 0.6666666666666666,
+      "intervention_quality_score": 0.75,
+      "evidence_usage_score": 1.0,
+      "conservative_mode_reasonable": false
     },
     {
       "case_id": 68,
@@ -963,7 +1235,11 @@
       "slot_student_id_hit": false,
       "slot_knowledge_points_hit": false,
       "need_clarify_triggered": true,
-      "recommended_packages_non_empty": true
+      "recommended_packages_non_empty": true,
+      "diagnosis_quality_score": 0.6666666666666666,
+      "intervention_quality_score": 0.75,
+      "evidence_usage_score": 0.3333333333333333,
+      "conservative_mode_reasonable": false
     },
     {
       "case_id": 69,
@@ -977,7 +1253,11 @@
       "slot_student_id_hit": false,
       "slot_knowledge_points_hit": false,
       "need_clarify_triggered": true,
-      "recommended_packages_non_empty": true
+      "recommended_packages_non_empty": true,
+      "diagnosis_quality_score": 0.6666666666666666,
+      "intervention_quality_score": 0.75,
+      "evidence_usage_score": 0.3333333333333333,
+      "conservative_mode_reasonable": false
     },
     {
       "case_id": 70,
@@ -991,7 +1271,11 @@
       "slot_student_id_hit": false,
       "slot_knowledge_points_hit": true,
       "need_clarify_triggered": true,
-      "recommended_packages_non_empty": true
+      "recommended_packages_non_empty": true,
+      "diagnosis_quality_score": 0.6666666666666666,
+      "intervention_quality_score": 0.75,
+      "evidence_usage_score": 1.0,
+      "conservative_mode_reasonable": false
     },
     {
       "case_id": 71,
@@ -1005,7 +1289,11 @@
       "slot_student_id_hit": false,
       "slot_knowledge_points_hit": false,
       "need_clarify_triggered": true,
-      "recommended_packages_non_empty": true
+      "recommended_packages_non_empty": true,
+      "diagnosis_quality_score": 0.6666666666666666,
+      "intervention_quality_score": 0.75,
+      "evidence_usage_score": 0.6666666666666666,
+      "conservative_mode_reasonable": false
     },
     {
       "case_id": 72,
@@ -1019,7 +1307,11 @@
       "slot_student_id_hit": false,
       "slot_knowledge_points_hit": false,
       "need_clarify_triggered": true,
-      "recommended_packages_non_empty": true
+      "recommended_packages_non_empty": true,
+      "diagnosis_quality_score": 0.6666666666666666,
+      "intervention_quality_score": 0.75,
+      "evidence_usage_score": 0.3333333333333333,
+      "conservative_mode_reasonable": false
     },
     {
       "case_id": 73,
@@ -1033,7 +1325,11 @@
       "slot_student_id_hit": false,
       "slot_knowledge_points_hit": true,
       "need_clarify_triggered": true,
-      "recommended_packages_non_empty": true
+      "recommended_packages_non_empty": true,
+      "diagnosis_quality_score": 0.6666666666666666,
+      "intervention_quality_score": 0.75,
+      "evidence_usage_score": 1.0,
+      "conservative_mode_reasonable": false
     },
     {
       "case_id": 74,
@@ -1047,7 +1343,11 @@
       "slot_student_id_hit": false,
       "slot_knowledge_points_hit": false,
       "need_clarify_triggered": true,
-      "recommended_packages_non_empty": true
+      "recommended_packages_non_empty": true,
+      "diagnosis_quality_score": 0.6666666666666666,
+      "intervention_quality_score": 0.75,
+      "evidence_usage_score": 0.3333333333333333,
+      "conservative_mode_reasonable": false
     },
     {
       "case_id": 75,
@@ -1061,7 +1361,11 @@
       "slot_student_id_hit": false,
       "slot_knowledge_points_hit": false,
       "need_clarify_triggered": true,
-      "recommended_packages_non_empty": true
+      "recommended_packages_non_empty": true,
+      "diagnosis_quality_score": 0.6666666666666666,
+      "intervention_quality_score": 0.75,
+      "evidence_usage_score": 0.3333333333333333,
+      "conservative_mode_reasonable": false
     },
     {
       "case_id": 76,
@@ -1075,7 +1379,11 @@
       "slot_student_id_hit": false,
       "slot_knowledge_points_hit": false,
       "need_clarify_triggered": true,
-      "recommended_packages_non_empty": true
+      "recommended_packages_non_empty": true,
+      "diagnosis_quality_score": 0.6666666666666666,
+      "intervention_quality_score": 0.75,
+      "evidence_usage_score": 0.3333333333333333,
+      "conservative_mode_reasonable": false
     },
     {
       "case_id": 77,
@@ -1089,7 +1397,11 @@
       "slot_student_id_hit": false,
       "slot_knowledge_points_hit": true,
       "need_clarify_triggered": true,
-      "recommended_packages_non_empty": true
+      "recommended_packages_non_empty": true,
+      "diagnosis_quality_score": 0.6666666666666666,
+      "intervention_quality_score": 0.75,
+      "evidence_usage_score": 1.0,
+      "conservative_mode_reasonable": false
     },
     {
       "case_id": 78,
@@ -1103,7 +1415,11 @@
       "slot_student_id_hit": false,
       "slot_knowledge_points_hit": false,
       "need_clarify_triggered": true,
-      "recommended_packages_non_empty": true
+      "recommended_packages_non_empty": true,
+      "diagnosis_quality_score": 0.6666666666666666,
+      "intervention_quality_score": 0.75,
+      "evidence_usage_score": 0.3333333333333333,
+      "conservative_mode_reasonable": false
     },
     {
       "case_id": 79,
@@ -1117,7 +1433,11 @@
       "slot_student_id_hit": false,
       "slot_knowledge_points_hit": false,
       "need_clarify_triggered": true,
-      "recommended_packages_non_empty": true
+      "recommended_packages_non_empty": true,
+      "diagnosis_quality_score": 0.6666666666666666,
+      "intervention_quality_score": 0.75,
+      "evidence_usage_score": 0.3333333333333333,
+      "conservative_mode_reasonable": false
     },
     {
       "case_id": 80,
@@ -1131,7 +1451,11 @@
       "slot_student_id_hit": false,
       "slot_knowledge_points_hit": false,
       "need_clarify_triggered": true,
-      "recommended_packages_non_empty": true
+      "recommended_packages_non_empty": true,
+      "diagnosis_quality_score": 0.6666666666666666,
+      "intervention_quality_score": 0.75,
+      "evidence_usage_score": 0.3333333333333333,
+      "conservative_mode_reasonable": false
     },
     {
       "case_id": 81,
@@ -1145,7 +1469,11 @@
       "slot_student_id_hit": false,
       "slot_knowledge_points_hit": false,
       "need_clarify_triggered": true,
-      "recommended_packages_non_empty": true
+      "recommended_packages_non_empty": true,
+      "diagnosis_quality_score": 0.6666666666666666,
+      "intervention_quality_score": 0.75,
+      "evidence_usage_score": 0.3333333333333333,
+      "conservative_mode_reasonable": false
     },
     {
       "case_id": 82,
@@ -1159,7 +1487,11 @@
       "slot_student_id_hit": false,
       "slot_knowledge_points_hit": false,
       "need_clarify_triggered": true,
-      "recommended_packages_non_empty": true
+      "recommended_packages_non_empty": true,
+      "diagnosis_quality_score": 0.6666666666666666,
+      "intervention_quality_score": 0.75,
+      "evidence_usage_score": 0.3333333333333333,
+      "conservative_mode_reasonable": false
     },
     {
       "case_id": 83,
@@ -1173,7 +1505,11 @@
       "slot_student_id_hit": false,
       "slot_knowledge_points_hit": false,
       "need_clarify_triggered": true,
-      "recommended_packages_non_empty": true
+      "recommended_packages_non_empty": true,
+      "diagnosis_quality_score": 0.6666666666666666,
+      "intervention_quality_score": 0.75,
+      "evidence_usage_score": 0.3333333333333333,
+      "conservative_mode_reasonable": false
     },
     {
       "case_id": 84,
@@ -1187,7 +1523,11 @@
       "slot_student_id_hit": false,
       "slot_knowledge_points_hit": false,
       "need_clarify_triggered": true,
-      "recommended_packages_non_empty": true
+      "recommended_packages_non_empty": true,
+      "diagnosis_quality_score": 0.6666666666666666,
+      "intervention_quality_score": 0.75,
+      "evidence_usage_score": 0.3333333333333333,
+      "conservative_mode_reasonable": false
     },
     {
       "case_id": 85,
@@ -1201,7 +1541,11 @@
       "slot_student_id_hit": false,
       "slot_knowledge_points_hit": false,
       "need_clarify_triggered": true,
-      "recommended_packages_non_empty": true
+      "recommended_packages_non_empty": true,
+      "diagnosis_quality_score": 0.6666666666666666,
+      "intervention_quality_score": 0.75,
+      "evidence_usage_score": 0.6666666666666666,
+      "conservative_mode_reasonable": false
     },
     {
       "case_id": 86,
@@ -1215,7 +1559,11 @@
       "slot_student_id_hit": false,
       "slot_knowledge_points_hit": false,
       "need_clarify_triggered": true,
-      "recommended_packages_non_empty": true
+      "recommended_packages_non_empty": true,
+      "diagnosis_quality_score": 0.6666666666666666,
+      "intervention_quality_score": 0.75,
+      "evidence_usage_score": 0.3333333333333333,
+      "conservative_mode_reasonable": false
     },
     {
       "case_id": 87,
@@ -1229,7 +1577,11 @@
       "slot_student_id_hit": false,
       "slot_knowledge_points_hit": false,
       "need_clarify_triggered": true,
-      "recommended_packages_non_empty": true
+      "recommended_packages_non_empty": true,
+      "diagnosis_quality_score": 0.6666666666666666,
+      "intervention_quality_score": 0.75,
+      "evidence_usage_score": 0.3333333333333333,
+      "conservative_mode_reasonable": false
     },
     {
       "case_id": 88,
@@ -1243,7 +1595,11 @@
       "slot_student_id_hit": false,
       "slot_knowledge_points_hit": false,
       "need_clarify_triggered": true,
-      "recommended_packages_non_empty": true
+      "recommended_packages_non_empty": true,
+      "diagnosis_quality_score": 0.6666666666666666,
+      "intervention_quality_score": 0.75,
+      "evidence_usage_score": 0.3333333333333333,
+      "conservative_mode_reasonable": false
     },
     {
       "case_id": 89,
@@ -1257,7 +1613,11 @@
       "slot_student_id_hit": false,
       "slot_knowledge_points_hit": false,
       "need_clarify_triggered": true,
-      "recommended_packages_non_empty": true
+      "recommended_packages_non_empty": true,
+      "diagnosis_quality_score": 0.6666666666666666,
+      "intervention_quality_score": 0.75,
+      "evidence_usage_score": 0.3333333333333333,
+      "conservative_mode_reasonable": false
     },
     {
       "case_id": 90,
@@ -1271,7 +1631,11 @@
       "slot_student_id_hit": false,
       "slot_knowledge_points_hit": false,
       "need_clarify_triggered": true,
-      "recommended_packages_non_empty": true
+      "recommended_packages_non_empty": true,
+      "diagnosis_quality_score": 0.6666666666666666,
+      "intervention_quality_score": 0.75,
+      "evidence_usage_score": 0.3333333333333333,
+      "conservative_mode_reasonable": false
     }
   ]
 }

@@ -4,7 +4,10 @@ import requests
 
 from app.core.config import settings
 from app.data_loader.loader import LocalDataStore
+from app.models.evidence import RAGEvidenceItem
 from app.tools.base import BaseRAGAdapter
+from app.tools.contracts import validate_query_contract, validate_rag_output
+from app.tools.response_mappers.rag_mapper import RAGResponseMapper
 
 
 class LocalRAGAdapter(BaseRAGAdapter):
@@ -12,20 +15,41 @@ class LocalRAGAdapter(BaseRAGAdapter):
 
     def __init__(self) -> None:
         self.store = LocalDataStore()
+        self.last_status = {"mapper": "local_normalize", "validation_ok": True, "error": ""}
 
     def search(self, query: str, keywords: list[str], top_k: int) -> list[dict[str, Any]]:
         terms = keywords or [query]
-        return self.store.search_rag(terms, limit=top_k)
+        mapped = []
+        for raw in self.store.search_rag(terms, limit=top_k):
+            mapped.append(
+                RAGEvidenceItem(
+                    source_id=str(raw.get("source_id") or raw.get("id") or ""),
+                    title=str(raw.get("title") or raw.get("name") or "本地文档"),
+                    snippet=str(raw.get("snippet") or raw.get("content") or str(raw)[:200]),
+                    score=float(raw.get("score") or 0.0),
+                    source_type=str(raw.get("source_type") or "rag_local"),
+                    metadata={"raw_keys": list(raw.keys())[:8]},
+                ).model_dump()
+            )
+        return mapped
 
 
 class RemoteRAGAdapter(BaseRAGAdapter):
     provider_name = "remote"
+
+    def __init__(self) -> None:
+        self.mapper = RAGResponseMapper()
+        self.last_status = {"mapper": "RAGResponseMapper", "validation_ok": True, "error": ""}
 
     def search(self, query: str, keywords: list[str], top_k: int) -> list[dict[str, Any]]:
         headers = {}
         if settings.RAG_API_KEY:
             headers["Authorization"] = f"Bearer {settings.RAG_API_KEY}"
         payload = {"query": query, "keywords": keywords, "top_k": top_k}
+        ok, error = validate_query_contract(payload)
+        if not ok:
+            self.last_status = {"mapper": "RAGResponseMapper", "validation_ok": False, "error": error}
+            return []
         try:
             response = requests.post(
                 f"{settings.RAG_API_BASE}/search",
@@ -34,11 +58,25 @@ class RemoteRAGAdapter(BaseRAGAdapter):
                 timeout=settings.RAG_TIMEOUT,
             )
             response.raise_for_status()
-            data = response.json()
-            return data.get("items", [])
-        except Exception:
-            # Remote provider placeholder fallback for current local runnable mode.
-            return [{"source": "remote_mock_rag", "content": "RAG remote placeholder response"}]
+            raw_data = response.json()
+            valid, normalized_payload, contract_error = validate_rag_output(raw_data)
+            if not valid:
+                self.last_status = {
+                    "mapper": "RAGResponseMapper",
+                    "validation_ok": False,
+                    "error": contract_error,
+                }
+                return []
+            mapped = self.mapper.map_items(normalized_payload)
+            self.last_status = {"mapper": "RAGResponseMapper", "validation_ok": True, "error": ""}
+            return mapped
+        except Exception as exc:
+            self.last_status = {
+                "mapper": "RAGResponseMapper",
+                "validation_ok": False,
+                "error": str(exc),
+            }
+            return []
 
 
 def get_rag_adapter() -> BaseRAGAdapter:

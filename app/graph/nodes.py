@@ -123,11 +123,18 @@ def fetch_rag_evidence(state: AgentState) -> AgentState:
         top_k=settings.TOP_K_RAG,
     )
     state["rag_evidence"] = rag
+    rag_status = getattr(rag_adapter, "last_status", {})
     _append_trace(
         state,
         node_name="fetch_rag_evidence",
         input_summary={"keywords": keywords[:5]},
-        output_summary={"rag_hits": len(rag), "provider": rag_adapter.provider_name},
+        output_summary={
+            "rag_hits": len(rag),
+            "provider": rag_adapter.provider_name,
+            "mapper": rag_status.get("mapper", ""),
+            "validation_ok": rag_status.get("validation_ok", True),
+            "validation_error": rag_status.get("error", ""),
+        },
         selected_tools=["rag_adapter.search"],
     )
     return state
@@ -146,11 +153,18 @@ def fetch_kg_evidence(state: AgentState) -> AgentState:
         top_k=settings.TOP_K_KG,
     )
     state["kg_evidence"] = kg
+    kg_status = getattr(kg_adapter, "last_status", {})
     _append_trace(
         state,
         node_name="fetch_kg_evidence",
         input_summary={"keywords": keywords[:5]},
-        output_summary={"kg_hits": len(kg), "provider": kg_adapter.provider_name},
+        output_summary={
+            "kg_hits": len(kg),
+            "provider": kg_adapter.provider_name,
+            "mapper": kg_status.get("mapper", ""),
+            "validation_ok": kg_status.get("validation_ok", True),
+            "validation_error": kg_status.get("error", ""),
+        },
         selected_tools=["kg_adapter.search"],
     )
     return state
@@ -241,15 +255,18 @@ def _build_evidence_summary(state: AgentState) -> dict[str, Any]:
         "rag_summary": {
             "hit_count": len(rag_items),
             "provider": settings.RAG_PROVIDER,
+            "schema": "RAGEvidenceItem",
             "preview": rag_items[:2],
         },
         "kg_summary": {
             "hit_count": len(kg_items),
             "provider": settings.KG_PROVIDER,
+            "schema": "KGEvidenceItem",
             "preview": kg_items[:2],
         },
         "mysql_summary": {
             "provider": settings.STUDENT_DATA_PROVIDER,
+            "schema": "StudentEvidenceBundle",
             "evidence": mysql,
         },
         "intervention_case_summary": {

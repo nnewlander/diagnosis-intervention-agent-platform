@@ -52,6 +52,86 @@ def get_request_text(row: dict[str, Any]) -> str:
     return ""
 
 
+def _normalized_score(hit_count: int, total_checks: int) -> float:
+    if total_checks <= 0:
+        return 0.0
+    return hit_count / total_checks
+
+
+def calc_diagnosis_quality_score(state: dict[str, Any]) -> float:
+    diagnosis = state.get("diagnosis", {}) or {}
+    slots = state.get("parsed_slots", {}) or {}
+    knowledge_points = slots.get("knowledge_points", []) or []
+    observed_problem = str(diagnosis.get("observed_problem", ""))
+    probable_cause = str(diagnosis.get("probable_cause", ""))
+    evidence_basis = diagnosis.get("evidence_basis", {})
+
+    hit = 0
+    # 规则1：提到 knowledge_points（文本包含任一知识点即命中）
+    if knowledge_points and any(kp in observed_problem for kp in knowledge_points if kp):
+        hit += 1
+    # 规则2：包含 probable_cause
+    if bool(probable_cause.strip()):
+        hit += 1
+    # 规则3：引用 evidence_basis
+    if isinstance(evidence_basis, dict) and len(evidence_basis) > 0:
+        hit += 1
+    return _normalized_score(hit, 3)
+
+
+def calc_intervention_quality_score(state: dict[str, Any]) -> float:
+    plan = state.get("intervention_plan", {}) or {}
+    slots = state.get("parsed_slots", {}) or {}
+    knowledge_points = slots.get("knowledge_points", []) or []
+
+    intervention_goal = str(plan.get("intervention_goal", ""))
+    day_1_action = str(plan.get("day_1_action", ""))
+    day_2_action = str(plan.get("day_2_action", ""))
+    day_3_action = str(plan.get("day_3_action", ""))
+
+    hit = 0
+    if bool(intervention_goal.strip()):
+        hit += 1
+    if bool(day_1_action.strip()):
+        hit += 1
+    # 规则3：包含多天结构（至少 day_1 + day_2，或 day_3）
+    if (bool(day_1_action.strip()) and bool(day_2_action.strip())) or bool(day_3_action.strip()):
+        hit += 1
+    # 规则4：与 knowledge_points 有重合
+    merged_plan_text = " ".join([intervention_goal, day_1_action, day_2_action, day_3_action])
+    if knowledge_points and any(kp in merged_plan_text for kp in knowledge_points if kp):
+        hit += 1
+    return _normalized_score(hit, 4)
+
+
+def calc_evidence_usage_score(state: dict[str, Any]) -> float:
+    mysql_evidence = state.get("mysql_evidence", {}) or {}
+    rag_evidence = state.get("rag_evidence", []) or []
+    kg_evidence = state.get("kg_evidence", []) or []
+    hit = 0
+    if isinstance(mysql_evidence, dict) and len(mysql_evidence) > 0:
+        hit += 1
+    if isinstance(rag_evidence, list) and len(rag_evidence) > 0:
+        hit += 1
+    if isinstance(kg_evidence, list) and len(kg_evidence) > 0:
+        hit += 1
+    return _normalized_score(hit, 3)
+
+
+def check_conservative_mode_reasonable(state: dict[str, Any]) -> bool:
+    """need_clarify=True 时不应给出完整诊断（否则判为不合理）。"""
+    need_clarify = bool(state.get("need_clarify", False))
+    if not need_clarify:
+        return True
+    diagnosis = state.get("diagnosis", {}) or {}
+    # 认为“完整诊断”至少包含这三项且非空
+    has_full = all(
+        bool(str(diagnosis.get(key, "")).strip())
+        for key in ["observed_problem", "probable_cause", "evidence_basis"]
+    )
+    return not has_full
+
+
 def main() -> None:
     graph = build_agent_graph()
     eval_rows = read_jsonl(settings.EVAL_DIR / "agent_eval_requests_10pct.jsonl")
@@ -73,6 +153,10 @@ def main() -> None:
     slot_kp_hits = 0
     clarify_trigger_hits = 0
     package_non_empty_hits = 0
+    diagnosis_quality_sum = 0.0
+    intervention_quality_sum = 0.0
+    evidence_usage_sum = 0.0
+    conservative_reasonable_hits = 0
 
     for idx, row in enumerate(eval_rows, start=1):
         request_text = get_request_text(row)
@@ -110,6 +194,10 @@ def main() -> None:
         kp_slot_ok = bool(slots.get("knowledge_points", []))
         clarify_ok = bool(state.get("need_clarify", False))
         package_ok = len(state.get("recommended_packages", [])) > 0
+        diagnosis_quality_score = calc_diagnosis_quality_score(state)
+        intervention_quality_score = calc_intervention_quality_score(state)
+        evidence_usage_score = calc_evidence_usage_score(state)
+        conservative_reasonable = check_conservative_mode_reasonable(state)
 
         structure_hits += int(structure_ok)
         diagnosis_hits += int(diagnosis_ok)
@@ -118,6 +206,10 @@ def main() -> None:
         slot_kp_hits += int(kp_slot_ok)
         clarify_trigger_hits += int(clarify_ok)
         package_non_empty_hits += int(package_ok)
+        diagnosis_quality_sum += diagnosis_quality_score
+        intervention_quality_sum += intervention_quality_score
+        evidence_usage_sum += evidence_usage_score
+        conservative_reasonable_hits += int(conservative_reasonable)
 
         details.append(
             {
@@ -133,6 +225,10 @@ def main() -> None:
                 "slot_knowledge_points_hit": kp_slot_ok,
                 "need_clarify_triggered": clarify_ok,
                 "recommended_packages_non_empty": package_ok,
+                "diagnosis_quality_score": diagnosis_quality_score,
+                "intervention_quality_score": intervention_quality_score,
+                "evidence_usage_score": evidence_usage_score,
+                "conservative_mode_reasonable": conservative_reasonable,
             }
         )
 
@@ -152,6 +248,10 @@ def main() -> None:
         "diagnosis_non_empty_rate": diagnosis_hits / total,
         "final_response_non_empty_rate": final_hits / total,
         "recommended_packages_non_empty_rate": package_non_empty_hits / total,
+        "diagnosis_quality_avg": diagnosis_quality_sum / total,
+        "intervention_quality_avg": intervention_quality_sum / total,
+        "evidence_usage_avg": evidence_usage_sum / total,
+        "conservative_mode_reasonable_rate": conservative_reasonable_hits / total,
         "task_type_eval_cases": task_match_total,
     }
 
@@ -185,6 +285,10 @@ def main() -> None:
                 "slot_knowledge_points_hit",
                 "need_clarify_triggered",
                 "recommended_packages_non_empty",
+                "diagnosis_quality_score",
+                "intervention_quality_score",
+                "evidence_usage_score",
+                "conservative_mode_reasonable",
             ],
         )
         writer.writeheader()
