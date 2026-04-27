@@ -11,6 +11,11 @@ class KGQuery(BaseModel):
 app = FastAPI(title="Mock KG Service", version="0.1.0")
 
 
+@app.get("/health")
+def health() -> dict:
+    return {"status": "ok", "service": "mock_kg"}
+
+
 @app.post("/graph_query")
 def graph_query(query: KGQuery) -> dict:
     # Use "records" + subject/predicate/object keys intentionally.

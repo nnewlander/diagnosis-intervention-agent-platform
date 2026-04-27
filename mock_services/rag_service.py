@@ -11,6 +11,11 @@ class RAGQuery(BaseModel):
 app = FastAPI(title="Mock RAG Service", version="0.1.0")
 
 
+@app.get("/health")
+def health() -> dict:
+    return {"status": "ok", "service": "mock_rag"}
+
+
 @app.post("/search")
 def search(query: RAGQuery) -> dict:
     # Use "hits" instead of "items" intentionally for mapper compatibility tests.
