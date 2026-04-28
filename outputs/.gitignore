@@ -51,3 +51,35 @@ build/
 # Jupyter
 .ipynb_checkpoints/
 
+# Python cache
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# IDE
+.idea/
+.vscode/
+
+# Env / secrets
+.env
+
+# Local database
+*.db
+*.sqlite
+*.sqlite3
+
+# Outputs
+outputs/
+
+# Virtual env
+.venv/
+venv/
+env/
+
+# OS
+.DS_Store
+Thumbs.db

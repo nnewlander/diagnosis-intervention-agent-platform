@@ -2,12 +2,11 @@ import csv
 import json
 from pathlib import Path
 import sys
+from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
-
-from typing import Any
 
 from app.core.config import settings
 from app.graph.workflow import build_agent_graph
@@ -37,10 +36,12 @@ def extract_expected_task(row: dict[str, Any]) -> str:
         return "diagnosis"
     if any(k in blob for k in ["intervention", "干预"]):
         return "intervention"
-    if any(k in blob for k in ["assignment", "练习", "下发"]):
-        return "assignment"
+    if any(k in blob for k in ["assignment", "练习", "下发", "dispatch"]):
+        return "dispatch"
     if any(k in blob for k in ["technical", "技术", "报错", "qa"]):
         return "technical_qa"
+    if "mixed" in blob:
+        return "mixed"
     return ""
 
 
@@ -52,111 +53,133 @@ def get_request_text(row: dict[str, Any]) -> str:
     return ""
 
 
-def _normalized_score(hit_count: int, total_checks: int) -> float:
-    if total_checks <= 0:
-        return 0.0
-    return hit_count / total_checks
+def _as_bool(v: Any) -> bool:
+    return bool(v)
 
 
-def calc_diagnosis_quality_score(state: dict[str, Any]) -> float:
-    diagnosis = state.get("diagnosis", {}) or {}
-    slots = state.get("parsed_slots", {}) or {}
-    knowledge_points = slots.get("knowledge_points", []) or []
-    observed_problem = str(diagnosis.get("observed_problem", ""))
-    probable_cause = str(diagnosis.get("probable_cause", ""))
-    evidence_basis = diagnosis.get("evidence_basis", {})
-
-    hit = 0
-    # 规则1：提到 knowledge_points（文本包含任一知识点即命中）
-    if knowledge_points and any(kp in observed_problem for kp in knowledge_points if kp):
-        hit += 1
-    # 规则2：包含 probable_cause
-    if bool(probable_cause.strip()):
-        hit += 1
-    # 规则3：引用 evidence_basis
-    if isinstance(evidence_basis, dict) and len(evidence_basis) > 0:
-        hit += 1
-    return _normalized_score(hit, 3)
+def _dict_non_empty(d: Any) -> bool:
+    return isinstance(d, dict) and len(d) > 0
 
 
-def calc_intervention_quality_score(state: dict[str, Any]) -> float:
-    plan = state.get("intervention_plan", {}) or {}
-    slots = state.get("parsed_slots", {}) or {}
-    knowledge_points = slots.get("knowledge_points", []) or []
-
-    intervention_goal = str(plan.get("intervention_goal", ""))
-    day_1_action = str(plan.get("day_1_action", ""))
-    day_2_action = str(plan.get("day_2_action", ""))
-    day_3_action = str(plan.get("day_3_action", ""))
-
-    hit = 0
-    if bool(intervention_goal.strip()):
-        hit += 1
-    if bool(day_1_action.strip()):
-        hit += 1
-    # 规则3：包含多天结构（至少 day_1 + day_2，或 day_3）
-    if (bool(day_1_action.strip()) and bool(day_2_action.strip())) or bool(day_3_action.strip()):
-        hit += 1
-    # 规则4：与 knowledge_points 有重合
-    merged_plan_text = " ".join([intervention_goal, day_1_action, day_2_action, day_3_action])
-    if knowledge_points and any(kp in merged_plan_text for kp in knowledge_points if kp):
-        hit += 1
-    return _normalized_score(hit, 4)
+def _list_non_empty(v: Any) -> bool:
+    return isinstance(v, list) and len(v) > 0
 
 
-def calc_evidence_usage_score(state: dict[str, Any]) -> float:
-    mysql_evidence = state.get("mysql_evidence", {}) or {}
-    rag_evidence = state.get("rag_evidence", []) or []
-    kg_evidence = state.get("kg_evidence", []) or []
-    hit = 0
-    if isinstance(mysql_evidence, dict) and len(mysql_evidence) > 0:
-        hit += 1
-    if isinstance(rag_evidence, list) and len(rag_evidence) > 0:
-        hit += 1
-    if isinstance(kg_evidence, list) and len(kg_evidence) > 0:
-        hit += 1
-    return _normalized_score(hit, 3)
+def determine_target_task(expected_task: str, actual_primary_task: str) -> str:
+    return expected_task or actual_primary_task or "unknown"
 
 
-def check_conservative_mode_reasonable(state: dict[str, Any]) -> bool:
-    """need_clarify=True 时不应给出完整诊断（否则判为不合理）。"""
-    need_clarify = bool(state.get("need_clarify", False))
-    if not need_clarify:
-        return True
-    diagnosis = state.get("diagnosis", {}) or {}
-    # 认为“完整诊断”至少包含这三项且非空
-    has_full = all(
-        bool(str(diagnosis.get(key, "")).strip())
-        for key in ["observed_problem", "probable_cause", "evidence_basis"]
+def evaluate_task_aware_case(
+    state: dict[str, Any], expected_task: str = "", actual_primary_task: str = ""
+) -> dict[str, Any]:
+    target_task = determine_target_task(expected_task, actual_primary_task)
+    diagnosis_non_empty = _dict_non_empty(state.get("diagnosis", {}))
+    intervention_non_empty = _dict_non_empty(state.get("intervention_plan", {}))
+    packages_non_empty = _list_non_empty(state.get("recommended_packages", []))
+    final_response_non_empty = bool(str(state.get("final_response", "")).strip())
+    need_clarify = _as_bool(state.get("need_clarify", False))
+    routing_mode = str(state.get("routing_mode", ""))
+    rag_hit_count = len(state.get("rag_evidence", []) or [])
+    rag_summary_hit = (
+        state.get("evidence_summary", {}).get("rag_summary", {}).get("hit_count", 0) or 0
     )
-    return not has_full
+    rag_hit = (rag_hit_count > 0) or (rag_summary_hit > 0)
+    mysql_non_empty = _dict_non_empty(state.get("mysql_evidence", {}))
+    has_student_context = bool(
+        state.get("student_id") or state.get("student_mention") or state.get("parsed_slots", {}).get("student_id")
+    )
+    secondary = state.get("secondary_task_types", []) or []
+
+    checks: list[tuple[bool, str]] = []
+
+    if target_task == "technical_qa":
+        checks = [
+            (final_response_non_empty, "technical_qa_final_response_empty"),
+            (not need_clarify, "technical_qa_need_clarify_true"),
+            (routing_mode == "technical_qa_short_path", "technical_qa_not_short_path"),
+            (rag_hit, "technical_qa_rag_miss"),
+        ]
+    elif target_task == "diagnosis":
+        checks = [(diagnosis_non_empty, "diagnosis_empty")]
+        if has_student_context:
+            checks.append((mysql_non_empty, "diagnosis_mysql_evidence_empty"))
+    elif target_task == "intervention":
+        checks = [(intervention_non_empty, "intervention_plan_empty")]
+    elif target_task == "dispatch":
+        checks = [(packages_non_empty, "dispatch_packages_empty")]
+    elif target_task == "mixed":
+        # Mixed coverage by secondary tasks.
+        sec_checks: list[tuple[bool, str]] = []
+        if "diagnosis" in secondary:
+            sec_checks.append((diagnosis_non_empty, "mixed_missing_diagnosis"))
+        if "intervention" in secondary:
+            sec_checks.append((intervention_non_empty, "mixed_missing_intervention"))
+        if "dispatch" in secondary:
+            sec_checks.append((packages_non_empty, "mixed_missing_dispatch_packages"))
+        # if secondary is empty, fallback to requiring final response
+        if not sec_checks:
+            sec_checks.append((final_response_non_empty, "mixed_final_response_empty"))
+        checks = sec_checks
+    else:
+        checks = [(final_response_non_empty, "unknown_final_response_empty")]
+
+    failed_reasons = [reason for ok, reason in checks if not ok]
+    return {
+        "target_task": target_task,
+        "task_aware_structure_ok": len(failed_reasons) == 0,
+        "failed_reasons": failed_reasons,
+        "diagnosis_non_empty": diagnosis_non_empty,
+        "intervention_non_empty": intervention_non_empty,
+        "packages_non_empty": packages_non_empty,
+        "final_response_non_empty": final_response_non_empty,
+        "need_clarify": need_clarify,
+        "routing_mode": routing_mode,
+        "rag_hit": rag_hit,
+    }
+
+
+def _safe_div(n: int | float, d: int | float) -> float | None:
+    if d == 0:
+        return None
+    return n / d
 
 
 def main() -> None:
     graph = build_agent_graph()
     eval_rows = read_jsonl(settings.EVAL_DIR / "agent_eval_requests_10pct.jsonl")
     settings.output_dir_path.mkdir(parents=True, exist_ok=True)
-
-    details: list[dict[str, Any]] = []
     if not eval_rows:
         print("[eval] 未找到评测数据或数据为空。")
         return
 
-    structure_hits = 0
-    diagnosis_hits = 0
-    final_hits = 0
-    task_match_hits = 0
-    task_match_total = 0
-    primary_task_match_hits = 0
-    primary_task_match_total = 0
-    slot_student_id_hits = 0
-    slot_kp_hits = 0
-    clarify_trigger_hits = 0
-    package_non_empty_hits = 0
-    diagnosis_quality_sum = 0.0
-    intervention_quality_sum = 0.0
-    evidence_usage_sum = 0.0
-    conservative_reasonable_hits = 0
+    details: list[dict[str, Any]] = []
+    technical_qa_error_cases: list[dict[str, Any]] = []
+    routing_error_cases: list[dict[str, Any]] = []
+
+    # Legacy counters (kept for backward compatibility).
+    legacy_structure_hits = 0
+    legacy_diagnosis_hits = 0
+    legacy_final_hits = 0
+    legacy_package_non_empty_hits = 0
+    legacy_task_match_hits = 0
+    legacy_task_match_total = 0
+
+    # Task-aware counters.
+    task_aware_ok_hits = 0
+    technical_qa_total = 0
+    technical_qa_match_hits = 0
+    technical_qa_final_ok = 0
+    technical_qa_rag_hit = 0
+    technical_qa_need_clarify_false = 0
+    technical_qa_short_path = 0
+    diagnosis_total = 0
+    diagnosis_non_empty_hits = 0
+    intervention_total = 0
+    intervention_non_empty_hits = 0
+    dispatch_total = 0
+    dispatch_package_non_empty_hits = 0
+    mixed_total = 0
+    mixed_secondary_coverage_hits = 0
 
     for idx, row in enumerate(eval_rows, start=1):
         request_text = get_request_text(row)
@@ -164,16 +187,10 @@ def main() -> None:
             continue
         state = graph.invoke({"request_text": request_text})
         expected_task = extract_expected_task(row)
-        actual_task = state.get("primary_task_type", "unknown")
+        actual_primary_task = state.get("primary_task_type", "unknown")
 
-        if expected_task:
-            task_match_total += 1
-            primary_task_match_total += 1
-            if expected_task == actual_task:
-                task_match_hits += 1
-                primary_task_match_hits += 1
-
-        required = [
+        # Legacy metrics.
+        legacy_required = [
             "task_type",
             "primary_task_type",
             "secondary_task_types",
@@ -183,84 +200,151 @@ def main() -> None:
             "evidence_summary",
             "final_response",
         ]
-        structure_ok = all(k in state for k in required)
-        diagnosis_obj = state.get("diagnosis", {})
-        diagnosis_ok = isinstance(diagnosis_obj, dict) and bool(
-            diagnosis_obj.get("observed_problem", "")
-        )
-        final_ok = bool(state.get("final_response", "").strip())
-        slots = state.get("parsed_slots", {})
-        student_slot_ok = bool(slots.get("student_id"))
-        kp_slot_ok = bool(slots.get("knowledge_points", []))
-        clarify_ok = bool(state.get("need_clarify", False))
-        package_ok = len(state.get("recommended_packages", [])) > 0
-        diagnosis_quality_score = calc_diagnosis_quality_score(state)
-        intervention_quality_score = calc_intervention_quality_score(state)
-        evidence_usage_score = calc_evidence_usage_score(state)
-        conservative_reasonable = check_conservative_mode_reasonable(state)
+        legacy_structure_ok = all(k in state for k in legacy_required)
+        legacy_diagnosis_ok = _dict_non_empty(state.get("diagnosis", {}))
+        legacy_final_ok = bool(str(state.get("final_response", "")).strip())
+        legacy_package_ok = _list_non_empty(state.get("recommended_packages", []))
+        legacy_structure_hits += int(legacy_structure_ok)
+        legacy_diagnosis_hits += int(legacy_diagnosis_ok)
+        legacy_final_hits += int(legacy_final_ok)
+        legacy_package_non_empty_hits += int(legacy_package_ok)
+        if expected_task:
+            legacy_task_match_total += 1
+            if expected_task == actual_primary_task:
+                legacy_task_match_hits += 1
 
-        structure_hits += int(structure_ok)
-        diagnosis_hits += int(diagnosis_ok)
-        final_hits += int(final_ok)
-        slot_student_id_hits += int(student_slot_ok)
-        slot_kp_hits += int(kp_slot_ok)
-        clarify_trigger_hits += int(clarify_ok)
-        package_non_empty_hits += int(package_ok)
-        diagnosis_quality_sum += diagnosis_quality_score
-        intervention_quality_sum += intervention_quality_score
-        evidence_usage_sum += evidence_usage_score
-        conservative_reasonable_hits += int(conservative_reasonable)
+        # Task-aware evaluation.
+        eval_result = evaluate_task_aware_case(
+            state=state,
+            expected_task=expected_task,
+            actual_primary_task=actual_primary_task,
+        )
+        target_task = eval_result["target_task"]
+        task_aware_ok = eval_result["task_aware_structure_ok"]
+        task_aware_ok_hits += int(task_aware_ok)
+
+        if target_task == "technical_qa":
+            technical_qa_total += 1
+            if expected_task == "technical_qa" and actual_primary_task == "technical_qa":
+                technical_qa_match_hits += 1
+            technical_qa_final_ok += int(eval_result["final_response_non_empty"])
+            technical_qa_rag_hit += int(eval_result["rag_hit"])
+            technical_qa_need_clarify_false += int(not eval_result["need_clarify"])
+            technical_qa_short_path += int(eval_result["routing_mode"] == "technical_qa_short_path")
+            if not task_aware_ok:
+                technical_qa_error_cases.append(
+                    {
+                        "eval_id": idx,
+                        "case_id": row.get("id", idx),
+                        "request_text": request_text,
+                        "expected_task": expected_task,
+                        "actual_primary_task": actual_primary_task,
+                        "need_clarify": state.get("need_clarify", False),
+                        "routing_mode": state.get("routing_mode", ""),
+                        "rag_hit_count": len(state.get("rag_evidence", []) or []),
+                        "final_response": state.get("final_response", ""),
+                        "error_reason": ";".join(eval_result["failed_reasons"]),
+                    }
+                )
+        elif target_task == "diagnosis":
+            diagnosis_total += 1
+            diagnosis_non_empty_hits += int(eval_result["diagnosis_non_empty"])
+        elif target_task == "intervention":
+            intervention_total += 1
+            intervention_non_empty_hits += int(eval_result["intervention_non_empty"])
+        elif target_task == "dispatch":
+            dispatch_total += 1
+            dispatch_package_non_empty_hits += int(eval_result["packages_non_empty"])
+        elif target_task == "mixed":
+            mixed_total += 1
+            mixed_secondary_coverage_hits += int(task_aware_ok)
+
+        if expected_task and expected_task != actual_primary_task:
+            routing_error_cases.append(
+                {
+                    "request_text": request_text,
+                    "expected_task": expected_task,
+                    "actual_primary_task": actual_primary_task,
+                    "detected_task_types": json.dumps(
+                        state.get("parsed_slots", {}).get("detected_task_types", []), ensure_ascii=False
+                    ),
+                    "parsed_slots": json.dumps(state.get("parsed_slots", {}), ensure_ascii=False),
+                    "error_reason": "task_mismatch",
+                }
+            )
 
         details.append(
             {
                 "case_id": row.get("id", idx),
                 "request_text": request_text,
                 "expected_task": expected_task,
-                "actual_primary_task": actual_task,
-                "task_match": expected_task == actual_task if expected_task else None,
-                "structure_ok": structure_ok,
-                "diagnosis_non_empty": diagnosis_ok,
-                "final_response_non_empty": final_ok,
-                "slot_student_id_hit": student_slot_ok,
-                "slot_knowledge_points_hit": kp_slot_ok,
-                "need_clarify_triggered": clarify_ok,
-                "recommended_packages_non_empty": package_ok,
-                "diagnosis_quality_score": diagnosis_quality_score,
-                "intervention_quality_score": intervention_quality_score,
-                "evidence_usage_score": evidence_usage_score,
-                "conservative_mode_reasonable": conservative_reasonable,
+                "actual_primary_task": actual_primary_task,
+                "target_task": target_task,
+                "task_aware_structure_ok": task_aware_ok,
+                "task_aware_failed_reasons": ";".join(eval_result["failed_reasons"]),
+                "need_clarify": eval_result["need_clarify"],
+                "routing_mode": eval_result["routing_mode"],
+                "rag_hit": eval_result["rag_hit"],
+                # Keep legacy fields for compatibility.
+                "legacy_structure_ok": legacy_structure_ok,
+                "legacy_diagnosis_non_empty": legacy_diagnosis_ok,
+                "legacy_final_response_non_empty": legacy_final_ok,
+                "legacy_recommended_packages_non_empty": legacy_package_ok,
             }
         )
 
     total = len(details) if details else 1
-    report = {
-        "total_cases": len(details),
-        "task_type_hit_rate": (task_match_hits / task_match_total) if task_match_total else None,
-        "primary_task_type_hit_rate": (
-            primary_task_match_hits / primary_task_match_total
-        )
-        if primary_task_match_total
-        else None,
-        "json_structure_completeness_rate": structure_hits / total,
-        "slot_student_id_coverage_rate": slot_student_id_hits / total,
-        "slot_knowledge_points_coverage_rate": slot_kp_hits / total,
-        "need_clarify_trigger_rate": clarify_trigger_hits / total,
-        "diagnosis_non_empty_rate": diagnosis_hits / total,
-        "final_response_non_empty_rate": final_hits / total,
-        "recommended_packages_non_empty_rate": package_non_empty_hits / total,
-        "diagnosis_quality_avg": diagnosis_quality_sum / total,
-        "intervention_quality_avg": intervention_quality_sum / total,
-        "evidence_usage_avg": evidence_usage_sum / total,
-        "conservative_mode_reasonable_rate": conservative_reasonable_hits / total,
-        "task_type_eval_cases": task_match_total,
+
+    legacy_metrics = {
+        "legacy_task_type_hit_rate": _safe_div(legacy_task_match_hits, legacy_task_match_total),
+        "legacy_json_structure_completeness_rate": _safe_div(legacy_structure_hits, total),
+        "legacy_diagnosis_non_empty_rate": _safe_div(legacy_diagnosis_hits, total),
+        "legacy_final_response_non_empty_rate": _safe_div(legacy_final_hits, total),
+        "legacy_recommended_packages_non_empty_rate": _safe_div(legacy_package_non_empty_hits, total),
     }
+
+    task_aware_metrics = {
+        "task_aware_structure_completeness_rate": _safe_div(task_aware_ok_hits, total),
+        "technical_qa_hit_rate": _safe_div(technical_qa_match_hits, technical_qa_total),
+        "technical_qa_final_response_rate": _safe_div(technical_qa_final_ok, technical_qa_total),
+        "technical_qa_rag_hit_rate": _safe_div(technical_qa_rag_hit, technical_qa_total),
+        "technical_qa_need_clarify_false_rate": _safe_div(
+            technical_qa_need_clarify_false, technical_qa_total
+        ),
+        "technical_qa_short_path_rate": _safe_div(technical_qa_short_path, technical_qa_total),
+        "diagnosis_task_diagnosis_non_empty_rate": _safe_div(
+            diagnosis_non_empty_hits, diagnosis_total
+        ),
+        "intervention_task_plan_non_empty_rate": _safe_div(
+            intervention_non_empty_hits, intervention_total
+        ),
+        "dispatch_task_package_non_empty_rate": _safe_div(
+            dispatch_package_non_empty_hits, dispatch_total
+        ),
+        "mixed_task_secondary_coverage_rate": _safe_div(
+            mixed_secondary_coverage_hits, mixed_total
+        ),
+    }
+
+    report = {"total_cases": len(details), **task_aware_metrics, **legacy_metrics, "legacy": legacy_metrics}
 
     report_json = settings.output_dir_path / "eval_report.json"
     report_csv = settings.output_dir_path / "eval_report.csv"
     detail_csv = settings.output_dir_path / "eval_case_details.csv"
+    technical_qa_error_csv = settings.output_dir_path / "technical_qa_error_cases.csv"
+    routing_error_csv = settings.output_dir_path / "routing_error_cases.csv"
 
     report_json.write_text(
-        json.dumps({"summary": report, "details": details}, ensure_ascii=False, indent=2),
+        json.dumps(
+            {
+                "summary": report,
+                "task_aware_metrics": task_aware_metrics,
+                "legacy_metrics": legacy_metrics,
+                "details": details,
+            },
+            ensure_ascii=False,
+            indent=2,
+        ),
         encoding="utf-8",
     )
 
@@ -277,30 +361,68 @@ def main() -> None:
                 "request_text",
                 "expected_task",
                 "actual_primary_task",
-                "task_match",
-                "structure_ok",
-                "diagnosis_non_empty",
-                "final_response_non_empty",
-                "slot_student_id_hit",
-                "slot_knowledge_points_hit",
-                "need_clarify_triggered",
-                "recommended_packages_non_empty",
-                "diagnosis_quality_score",
-                "intervention_quality_score",
-                "evidence_usage_score",
-                "conservative_mode_reasonable",
+                "target_task",
+                "task_aware_structure_ok",
+                "task_aware_failed_reasons",
+                "need_clarify",
+                "routing_mode",
+                "rag_hit",
+                "legacy_structure_ok",
+                "legacy_diagnosis_non_empty",
+                "legacy_final_response_non_empty",
+                "legacy_recommended_packages_non_empty",
             ],
         )
         writer.writeheader()
         for row in details:
             writer.writerow(row)
 
+    with technical_qa_error_csv.open("w", encoding="utf-8-sig", newline="") as f:
+        writer = csv.DictWriter(
+            f,
+            fieldnames=[
+                "eval_id",
+                "case_id",
+                "request_text",
+                "expected_task",
+                "actual_primary_task",
+                "need_clarify",
+                "routing_mode",
+                "rag_hit_count",
+                "final_response",
+                "error_reason",
+            ],
+        )
+        writer.writeheader()
+        for row in technical_qa_error_cases:
+            writer.writerow(row)
+
+    with routing_error_csv.open("w", encoding="utf-8-sig", newline="") as f:
+        writer = csv.DictWriter(
+            f,
+            fieldnames=[
+                "request_text",
+                "expected_task",
+                "actual_primary_task",
+                "detected_task_types",
+                "parsed_slots",
+                "error_reason",
+            ],
+        )
+        writer.writeheader()
+        for row in routing_error_cases:
+            writer.writerow(row)
+
     print("[eval] 汇总结果：")
     for key, value in report.items():
+        if key == "legacy":
+            continue
         print(f"- {key}: {value}")
     print(f"[eval] 输出文件: {report_json}")
     print(f"[eval] 输出文件: {report_csv}")
     print(f"[eval] 详情文件: {detail_csv}")
+    print(f"[eval] technical_qa 错误样本: {technical_qa_error_csv}")
+    print(f"[eval] routing 错误样本: {routing_error_csv}")
 
 
 if __name__ == "__main__":

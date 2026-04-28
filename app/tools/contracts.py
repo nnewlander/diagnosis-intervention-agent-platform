@@ -5,8 +5,10 @@ from pydantic import BaseModel, Field, ValidationError, model_validator
 
 class RemoteQueryContract(BaseModel):
     query: str
-    keywords: list[str] = Field(default_factory=list)
     top_k: int = 5
+    keywords: list[str] = Field(default_factory=list)
+    filters: dict[str, Any] = Field(default_factory=dict)
+    request_id: str = ""
 
 
 class RemoteRAGOutputContract(BaseModel):

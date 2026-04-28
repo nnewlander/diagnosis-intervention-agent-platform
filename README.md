@@ -54,9 +54,11 @@
 - `MAX_SUBMISSIONS`: 每次最多读取提交记录数
 - `OUTPUT_DIR`: 离线评测输出目录
 - `RAG_PROVIDER`: `local|remote`
-- `RAG_API_BASE`: 项目二 RAG 服务地址
+- `RAG_API_BASE`: 项目二 RAG 服务地址（默认 `http://127.0.0.1:8001`）
+- `RAG_ENDPOINT`: 项目二 RAG 检索端点（默认 `/search`）
 - `RAG_API_KEY`: 可选鉴权令牌
-- `RAG_TIMEOUT`: RAG 请求超时秒数
+- `RAG_TIMEOUT`: RAG 请求超时秒数（默认 10）
+- `RAG_RESPONSE_STYLE`: `auto`（自动识别 search/ask 风格）
 - `KG_PROVIDER`: `local|remote`
 - `KG_API_BASE`: 项目三 KG 服务地址
 - `KG_API_KEY`: 可选鉴权令牌
@@ -79,9 +81,11 @@ TOP_K_PACKAGES=3
 MAX_SUBMISSIONS=10
 OUTPUT_DIR=outputs
 RAG_PROVIDER=local
-RAG_API_BASE=http://127.0.0.1:9002
+RAG_API_BASE=http://127.0.0.1:8001
+RAG_ENDPOINT=/search
 RAG_API_KEY=
-RAG_TIMEOUT=15
+RAG_TIMEOUT=10
+RAG_RESPONSE_STYLE=auto
 KG_PROVIDER=local
 KG_API_BASE=http://127.0.0.1:9003
 KG_API_KEY=
@@ -172,11 +176,35 @@ python scripts/eval_offline.py
 - `final_response` 非空率
 - `recommended_packages` 非空率
 
+任务感知（task-aware）指标：
+
+- `task_aware_structure_completeness_rate`
+- `technical_qa_final_response_rate`
+- `technical_qa_rag_hit_rate`
+- `technical_qa_need_clarify_false_rate`
+- `technical_qa_short_path_rate`
+- `diagnosis_task_diagnosis_non_empty_rate`
+- `intervention_task_plan_non_empty_rate`
+- `dispatch_task_package_non_empty_rate`
+- `mixed_task_secondary_coverage_rate`
+
+说明：
+
+- 对 `technical_qa` 请求，不再要求 `diagnosis/intervention_plan/recommended_packages` 非空。
+- 原因是技术答疑走 `technical_qa_short_path`，目标是“解释报错与课堂讲法”，不是学情诊断或练习下发。
+- task-aware 评测用于避免把技术答疑的“空诊断/空干预”误判为失败。
+
 输出文件：
 
 - `outputs/eval_report.json`
 - `outputs/eval_report.csv`
 - `outputs/eval_case_details.csv`
+- `outputs/technical_qa_error_cases.csv`
+- `outputs/routing_error_cases.csv`
+
+查看 technical_qa 错误样本：
+
+- 打开 `outputs/technical_qa_error_cases.csv`，重点看 `error_reason`、`need_clarify`、`routing_mode`、`rag_hit_count`。
 
 ## 混合请求路由说明
 
@@ -259,8 +287,9 @@ Mapper 层（`app/tools/response_mappers/`）负责：
 
 - 项目二（RAG）：
   1. 设置 `RAG_PROVIDER=remote`
-  2. 配置 `RAG_API_BASE` 与可选 `RAG_API_KEY`
-  3. 在 `RemoteRAGAdapter.search` 中按真实接口协议补齐 payload/response mapping
+  2. 配置 `RAG_API_BASE`、`RAG_ENDPOINT` 与可选 `RAG_API_KEY`
+  3. `RemoteRAGAdapter` 请求体固定包含 `query/top_k/filters/request_id`
+  4. 响应先过 contract validation，再过 mapper，最后归一化到 `RAGEvidenceItem`
   4. 若字段变化，只改 `RAGResponseMapper`，无需改 graph
 
 - 项目三（KG）：
@@ -290,6 +319,38 @@ python scripts/smoke_test_remote.py
 ```
 
 该脚本会切换 `RAG_PROVIDER=remote` 和 `KG_PROVIDER=remote`，并打印 evidence 示例，便于联调前验证 mapper 和 contract 行为。
+
+## 真实项目二 RAG 联调
+
+1) 先启动项目二 RAG 服务（确保可访问 `POST /search`）  
+2) 在项目一 `.env` 中配置：
+
+```env
+RAG_PROVIDER=remote
+RAG_API_BASE=http://127.0.0.1:8001
+RAG_ENDPOINT=/search
+RAG_API_KEY=
+RAG_TIMEOUT=10
+RAG_RESPONSE_STYLE=auto
+```
+
+3) 执行真实 RAG smoke：
+
+```bash
+python scripts/smoke_test_real_rag.py
+# 或强制 remote 模式
+python scripts/smoke_test_real_rag.py --force-remote
+```
+
+脚本会打印最终生效配置：`RAG_PROVIDER/RAG_API_BASE/RAG_ENDPOINT/KG_PROVIDER`。  
+若最终 `RAG_PROVIDER` 不是 `remote`，脚本会直接失败并提示如何修正 `.env`。
+
+常见问题：
+
+- **项目二没启动**：会出现连接失败，`validation_ok` 为 false，`error` 中有连接异常。
+- **端口不是 8001**：修改 `RAG_API_BASE` 为真实端口地址。
+- **`/search` 不存在**：修改 `RAG_ENDPOINT`，确保拼接后 URL 正确。
+- **返回字段无法识别**：检查 `RAGResponseMapper` 是否覆盖当前响应字段（如 `hits/results/items`）。
 
 ## SQLite 初始化步骤
 

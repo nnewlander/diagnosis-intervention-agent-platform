@@ -1,4 +1,5 @@
 from typing import Any
+from uuid import uuid4
 
 import requests
 
@@ -40,19 +41,28 @@ class RemoteRAGAdapter(BaseRAGAdapter):
     def __init__(self) -> None:
         self.mapper = RAGResponseMapper()
         self.last_status = {"mapper": "RAGResponseMapper", "validation_ok": True, "error": ""}
+        self.last_url = ""
 
     def search(self, query: str, keywords: list[str], top_k: int) -> list[dict[str, Any]]:
         headers = {}
         if settings.RAG_API_KEY:
             headers["Authorization"] = f"Bearer {settings.RAG_API_KEY}"
-        payload = {"query": query, "keywords": keywords, "top_k": top_k}
+        endpoint = settings.RAG_ENDPOINT if settings.RAG_ENDPOINT.startswith("/") else f"/{settings.RAG_ENDPOINT}"
+        request_url = f"{settings.RAG_API_BASE.rstrip('/')}{endpoint}"
+        self.last_url = request_url
+        payload = {
+            "query": query,
+            "top_k": top_k,
+            "filters": {"keywords": keywords},
+            "request_id": f"rag-{uuid4().hex[:12]}",
+        }
         ok, error = validate_query_contract(payload)
         if not ok:
             self.last_status = {"mapper": "RAGResponseMapper", "validation_ok": False, "error": error}
             return []
         try:
             response = requests.post(
-                f"{settings.RAG_API_BASE}/search",
+                request_url,
                 json=payload,
                 headers=headers,
                 timeout=settings.RAG_TIMEOUT,
@@ -61,6 +71,15 @@ class RemoteRAGAdapter(BaseRAGAdapter):
             raw_data = response.json()
             valid, normalized_payload, contract_error = validate_rag_output(raw_data)
             if not valid:
+                # Fallback mode for ask-style/other non-search responses.
+                fallback_items = self.mapper.map_items(raw_data)
+                if fallback_items:
+                    self.last_status = {
+                        "mapper": "RAGResponseMapper",
+                        "validation_ok": False,
+                        "error": f"{contract_error}; fallback_applied",
+                    }
+                    return fallback_items
                 self.last_status = {
                     "mapper": "RAGResponseMapper",
                     "validation_ok": False,
@@ -68,7 +87,11 @@ class RemoteRAGAdapter(BaseRAGAdapter):
                 }
                 return []
             mapped = self.mapper.map_items(normalized_payload)
-            self.last_status = {"mapper": "RAGResponseMapper", "validation_ok": True, "error": ""}
+            self.last_status = {
+                "mapper": "RAGResponseMapper",
+                "validation_ok": True,
+                "error": "",
+            }
             return mapped
         except Exception as exc:
             self.last_status = {

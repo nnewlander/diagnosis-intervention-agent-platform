@@ -71,6 +71,13 @@ def route_task(state: AgentState) -> AgentState:
     state["primary_task_type"] = primary
     state["secondary_task_types"] = secondary
     state["task_type"] = "mixed" if len(detected) > 1 else primary
+    requires_student_context = primary in {"diagnosis", "intervention", "dispatch"} or any(
+        t in {"diagnosis", "intervention", "dispatch"} for t in secondary
+    )
+    if primary == "technical_qa" and not requires_student_context:
+        state["routing_mode"] = "technical_qa_short_path"
+    else:
+        state["routing_mode"] = "task_based_routing"
     _append_trace(
         state,
         node_name="route_task",
@@ -79,6 +86,7 @@ def route_task(state: AgentState) -> AgentState:
             "task_type": state.get("task_type"),
             "primary_task_type": primary,
             "secondary_task_types": secondary,
+            "routing_mode": state.get("routing_mode"),
         },
         selected_tools=["rule_router_v2"],
     )
@@ -86,21 +94,34 @@ def route_task(state: AgentState) -> AgentState:
 
 
 def clarify_if_needed(state: AgentState) -> AgentState:
-    student_adapter = get_student_data_adapter()
-    resolver = student_adapter.resolve_student(
-        student_id=state.get("student_id", ""),
-        student_mention=state.get("student_mention", ""),
+    primary = state.get("primary_task_type", "unknown")
+    secondary = state.get("secondary_task_types", [])
+    requires_student_context = primary in {"diagnosis", "intervention", "dispatch"} or any(
+        t in {"diagnosis", "intervention", "dispatch"} for t in secondary
     )
-    state["resolver_result"] = resolver
-    if resolver.get("student_id"):
-        state["student_id"] = resolver.get("student_id", "")
 
+    resolver = {}
     questions: list[str] = []
-    if resolver.get("need_clarify"):
-        questions.append(resolver.get("clarify_message", "请补充 student_id。"))
-    if state.get("primary_task_type") in {"diagnosis", "intervention", "dispatch"} and not state.get(
-        "knowledge_points", []
-    ):
+
+    if requires_student_context:
+        student_adapter = get_student_data_adapter()
+        resolver = student_adapter.resolve_student(
+            student_id=state.get("student_id", ""),
+            student_mention=state.get("student_mention", ""),
+        )
+        state["resolver_result"] = resolver
+        if resolver.get("student_id"):
+            state["student_id"] = resolver.get("student_id", "")
+        if resolver.get("need_clarify"):
+            questions.append(resolver.get("clarify_message", "请补充 student_id。"))
+    else:
+        state["resolver_result"] = {
+            "student_id": state.get("student_id", ""),
+            "resolved_by": "not_required_for_task",
+            "need_clarify": False,
+        }
+
+    if requires_student_context and not state.get("knowledge_points", []):
         questions.append("请补充关注知识点，如 for循环、函数、字符串、异常处理。")
     state["clarify_questions"] = questions
     state["need_clarify"] = len(questions) > 0
@@ -116,9 +137,21 @@ def clarify_if_needed(state: AgentState) -> AgentState:
 
 def fetch_rag_evidence(state: AgentState) -> AgentState:
     rag_adapter = get_rag_adapter()
-    keywords = state.get("knowledge_points", []) or [state.get("request_text", "")]
+    request_text = state.get("request_text", "")
+    error_type = state.get("error_type", "")
+    knowledge_points = state.get("knowledge_points", [])
+    rag_query_parts = [request_text]
+    if error_type:
+        rag_query_parts.append(error_type)
+    if knowledge_points:
+        rag_query_parts.extend(knowledge_points)
+    rag_query = " ".join([p for p in rag_query_parts if p]).strip()
+    state["rag_query"] = rag_query
+    keywords = knowledge_points[:] if knowledge_points else [request_text]
+    if error_type and error_type not in keywords:
+        keywords.append(error_type)
     rag = rag_adapter.search(
-        query=state.get("request_text", ""),
+        query=rag_query,
         keywords=keywords,
         top_k=settings.TOP_K_RAG,
     )
@@ -127,7 +160,7 @@ def fetch_rag_evidence(state: AgentState) -> AgentState:
     _append_trace(
         state,
         node_name="fetch_rag_evidence",
-        input_summary={"keywords": keywords[:5]},
+        input_summary={"keywords": keywords[:5], "rag_query": rag_query},
         output_summary={
             "rag_hits": len(rag),
             "provider": rag_adapter.provider_name,
@@ -286,15 +319,30 @@ def build_final_response(state: AgentState) -> AgentState:
         if state.get("need_clarify")
         else ""
     )
-    state["final_response"] = (
-        f"我已先按“{state.get('primary_task_type', 'unknown')}”处理你的请求，"
-        f"并补充了次任务 {state.get('secondary_task_types', [])} 的结果。\n"
-        f"当前观察：{diagnosis.get('observed_problem', '暂无明确观察')}\n"
-        f"可能原因：{diagnosis.get('probable_cause', '暂无明确原因')}\n"
-        f"建议目标：{plan.get('intervention_goal', '请先补齐关键信息')}\n"
-        f"已推荐练习包 {len(state.get('recommended_packages', []))} 个。"
-        f"{clarify_lines}"
-    )
+    if state.get("primary_task_type") == "technical_qa":
+        error_type = state.get("error_type", "") or "常见运行错误"
+        rag_items = state.get("rag_evidence", [])
+        rag_hint = ""
+        if rag_items:
+            first = rag_items[0]
+            rag_hint = f"\n参考证据：{first.get('title', '')} - {first.get('snippet', '')[:80]}"
+        state["final_response"] = (
+            f"问题判断：这是一个 {error_type} 类问题。\n"
+            "原因解释：通常表示变量或函数名在使用前未定义，或者命名与实际定义不一致。\n"
+            "课堂讲法：先让学生定位报错行，再逐行检查变量是否先定义后使用。\n"
+            "示例提醒：重点检查大小写、拼写和作用域（函数内外变量是否可见）。"
+            f"{rag_hint}"
+        )
+    else:
+        state["final_response"] = (
+            f"我已先按“{state.get('primary_task_type', 'unknown')}”处理你的请求，"
+            f"并补充了次任务 {state.get('secondary_task_types', [])} 的结果。\n"
+            f"当前观察：{diagnosis.get('observed_problem', '暂无明确观察')}\n"
+            f"可能原因：{diagnosis.get('probable_cause', '暂无明确原因')}\n"
+            f"建议目标：{plan.get('intervention_goal', '请先补齐关键信息')}\n"
+            f"已推荐练习包 {len(state.get('recommended_packages', []))} 个。"
+            f"{clarify_lines}"
+        )
     _append_trace(
         state,
         node_name="build_final_response",

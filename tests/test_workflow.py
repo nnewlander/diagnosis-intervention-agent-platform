@@ -7,6 +7,76 @@ from scripts.build_local_sqlite import build_local_sqlite
 
 
 def _run(request_text: str) -> dict:
+    return build_agent_graph().invoke({"request_text": request_text})
+
+
+def test_local_provider_mode_workflow_runs(monkeypatch):
+    monkeypatch.setattr(settings, "RAG_PROVIDER", "local")
+    monkeypatch.setattr(settings, "KG_PROVIDER", "local")
+    monkeypatch.setattr(settings, "STUDENT_DATA_PROVIDER", "local_csv_jsonl")
+    state = _run("请做学情诊断：student_id:STU-0001 最近几次作业表现如何？")
+    assert state["primary_task_type"] == "diagnosis"
+    assert "debug_trace" in state
+    assert "evidence_summary" in state
+
+
+def test_sqlite_provider_mode_student_query_runs(monkeypatch):
+    db_path = build_local_sqlite()
+    monkeypatch.setattr(settings, "SQLITE_DB_PATH", str(db_path.relative_to(settings.PROJECT_ROOT)))
+    monkeypatch.setattr(settings, "STUDENT_DATA_PROVIDER", "sqlite")
+    state = _run("请诊断 student_id:STU-0001 的函数问题")
+    assert "mysql_evidence" in state
+    assert "profile_summary" in state["mysql_evidence"]
+
+
+def test_provider_switch_logic(monkeypatch):
+    monkeypatch.setattr(settings, "RAG_PROVIDER", "remote")
+    monkeypatch.setattr(settings, "KG_PROVIDER", "remote")
+    monkeypatch.setattr(settings, "STUDENT_DATA_PROVIDER", "local_csv_jsonl")
+    assert get_rag_adapter().provider_name == "remote"
+    assert get_kg_adapter().provider_name == "remote"
+    assert get_student_data_adapter().provider_name == "local_csv_jsonl"
+
+
+def test_nameerror_explain_should_be_technical_qa():
+    state = _run("课堂演示遇到 NameError，应该怎么给学生解释？")
+    assert state["primary_task_type"] == "technical_qa"
+    assert state["error_type"] == "NameError"
+    assert state["need_clarify"] is False
+    assert "technical_qa" in state.get("parsed_slots", {}).get("detected_task_types", [])
+    assert isinstance(state.get("rag_evidence", []), list)
+    assert "请补充 student_id" not in state.get("final_response", "")
+    assert state.get("routing_mode") == "technical_qa_short_path"
+    assert state.get("diagnosis", {}) in ({}, None)
+    assert state.get("intervention_plan", {}) in ({}, None)
+    assert state.get("recommended_packages", []) == []
+    rag_query = state.get("rag_query", "")
+    assert "课堂演示遇到 NameError" in rag_query
+    assert "NameError" in rag_query
+    assert "变量" in rag_query
+
+
+def test_nameerror_with_student_should_be_diagnosis():
+    state = _run("李同学最近总是 NameError，帮我诊断一下")
+    assert state["primary_task_type"] == "diagnosis"
+    assert state["need_clarify"] is True
+
+
+def test_mixed_request_still_runs_diagnosis_branch():
+    state = _run("先诊断 student_id:STU-0001 的 NameError 问题，再给我3天干预计划")
+    assert state["task_type"] == "mixed"
+    assert state.get("routing_mode") == "task_based_routing"
+    assert isinstance(state.get("diagnosis", {}), dict)
+    assert isinstance(state.get("intervention_plan", {}), dict)
+from app.core.config import settings
+from app.graph.workflow import build_agent_graph
+from app.tools.kg_adapter import get_kg_adapter
+from app.tools.rag_adapter import get_rag_adapter
+from app.tools.student_data_adapter import get_student_data_adapter
+from scripts.build_local_sqlite import build_local_sqlite
+
+
+def _run(request_text: str) -> dict:
     graph = build_agent_graph()
     return graph.invoke({"request_text": request_text})
 

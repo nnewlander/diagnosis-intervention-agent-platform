@@ -13,6 +13,11 @@ class RAGResponseMapper(BaseResponseMapper):
             value = payload.get(key)
             if isinstance(value, list):
                 return value
+        # ask-style fallback: no hits list, only answer-like content.
+        for key in ["answer", "response", "output"]:
+            value = payload.get(key)
+            if isinstance(value, str) and value.strip():
+                return [{"id": "ask_fallback", "name": "ask_style_response", "text": value, "similarity": 0.0}]
         return []
 
     def map_items(self, payload: dict[str, Any]) -> list[dict[str, Any]]:

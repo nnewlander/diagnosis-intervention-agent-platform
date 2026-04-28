@@ -15,6 +15,12 @@ from app.graph.nodes import (
 from app.graph.state import AgentState
 
 
+def _after_kg_route(state: AgentState) -> str:
+    if state.get("routing_mode") == "technical_qa_short_path":
+        return "build_final_response"
+    return "fetch_mysql_evidence"
+
+
 def build_agent_graph():
     graph = StateGraph(AgentState)
 
@@ -34,7 +40,14 @@ def build_agent_graph():
     graph.add_edge("route_task", "clarify_if_needed")
     graph.add_edge("clarify_if_needed", "fetch_rag_evidence")
     graph.add_edge("fetch_rag_evidence", "fetch_kg_evidence")
-    graph.add_edge("fetch_kg_evidence", "fetch_mysql_evidence")
+    graph.add_conditional_edges(
+        "fetch_kg_evidence",
+        _after_kg_route,
+        {
+            "build_final_response": "build_final_response",
+            "fetch_mysql_evidence": "fetch_mysql_evidence",
+        },
+    )
     graph.add_edge("fetch_mysql_evidence", "generate_diagnosis")
     graph.add_edge("generate_diagnosis", "generate_intervention")
     graph.add_edge("generate_intervention", "recommend_package")

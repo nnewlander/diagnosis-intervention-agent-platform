@@ -18,6 +18,7 @@ class AgentState(TypedDict, total=False):
     need_clarify: bool
     clarify_questions: list[str]
     rag_evidence: list[dict]
+    rag_query: str
     kg_evidence: list[dict]
     mysql_evidence: dict
     diagnosis: str
@@ -25,5 +26,6 @@ class AgentState(TypedDict, total=False):
     recommended_packages: list[dict]
     intervention_case_evidence: list[dict]
     evidence_summary: dict
+    routing_mode: str
     final_response: str
     debug_trace: list[dict]
