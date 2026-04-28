@@ -340,6 +340,8 @@ RAG_RESPONSE_STYLE=auto
 python scripts/smoke_test_real_rag.py
 # 或强制 remote 模式
 python scripts/smoke_test_real_rag.py --force-remote
+# 推荐（自动 warmup + 遇到 fallback 直接失败）
+python scripts/smoke_test_real_rag.py --force-remote --auto-warmup --fail-on-fallback
 ```
 
 脚本会打印最终生效配置：`RAG_PROVIDER/RAG_API_BASE/RAG_ENDPOINT/KG_PROVIDER`。  

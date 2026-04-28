@@ -87,7 +87,10 @@ def test_smoke_real_rag_force_remote(monkeypatch):
     class FakeGraph:
         def invoke(self, payload):  # noqa: ANN001
             return {
-                "rag_evidence": [{"source_id": "x"}],
+                "rag_query": "课堂演示遇到 NameError NameError 变量",
+                "error_type": "NameError",
+                "parsed_slots": {"knowledge_points": ["变量"]},
+                "rag_evidence": [{"source_id": "x", "title": "t", "snippet": "s", "source_type": "faq", "metadata": {"route": "bm25_faq"}}],
                 "final_response": "ok",
                 "debug_trace": [
                     {"node_name": "fetch_rag_evidence", "output_summary": {"validation_ok": True, "mapper": "m"}}
@@ -101,3 +104,94 @@ def test_smoke_real_rag_force_remote(monkeypatch):
     exit_code = smoke_module.main()
     assert exit_code == 0
     assert settings.RAG_PROVIDER == "remote"
+
+
+def test_smoke_fallback_warn_and_fail_on_fallback(monkeypatch, capsys):
+    class FakeGraph:
+        def invoke(self, payload):  # noqa: ANN001
+            return {
+                "rag_query": "q",
+                "error_type": "NameError",
+                "parsed_slots": {"knowledge_points": ["变量"]},
+                "rag_evidence": [
+                    {
+                        "source_id": "FALLBACK-NameError",
+                        "title": "fallback",
+                        "snippet": "fallback content",
+                        "source_type": "fallback_error_guide",
+                        "metadata": {"fallback": True},
+                    }
+                ],
+                "final_response": "ok",
+                "debug_trace": [
+                    {"node_name": "fetch_rag_evidence", "output_summary": {"validation_ok": True, "mapper": "m"}}
+                ],
+            }
+
+    import scripts.smoke_test_real_rag as smoke_module
+
+    monkeypatch.setattr(smoke_module, "build_agent_graph", lambda: FakeGraph())
+    monkeypatch.setattr(
+        smoke_module.sys, "argv", ["smoke_test_real_rag.py", "--force-remote", "--fail-on-fallback"]
+    )
+    exit_code = smoke_module.main()
+    out = capsys.readouterr().out
+    assert "fallback evidence" in out
+    assert exit_code != 0
+
+
+def test_smoke_faq_evidence_not_fail(monkeypatch, capsys):
+    class FakeGraph:
+        def invoke(self, payload):  # noqa: ANN001
+            return {
+                "rag_query": "q",
+                "error_type": "NameError",
+                "parsed_slots": {"knowledge_points": ["变量"]},
+                "rag_evidence": [
+                    {
+                        "source_id": "seed-faq-nameerror",
+                        "title": "faq",
+                        "snippet": "faq content",
+                        "source_type": "faq",
+                        "metadata": {"route": "bm25_faq", "fallback": False},
+                    }
+                ],
+                "final_response": "ok",
+                "debug_trace": [
+                    {"node_name": "fetch_rag_evidence", "output_summary": {"validation_ok": True, "mapper": "m"}}
+                ],
+            }
+
+    import scripts.smoke_test_real_rag as smoke_module
+
+    monkeypatch.setattr(smoke_module, "build_agent_graph", lambda: FakeGraph())
+    monkeypatch.setattr(
+        smoke_module.sys, "argv", ["smoke_test_real_rag.py", "--force-remote", "--fail-on-fallback"]
+    )
+    exit_code = smoke_module.main()
+    out = capsys.readouterr().out
+    assert "真实 FAQ/BM25 evidence" in out
+    assert exit_code == 0
+
+
+def test_smoke_prints_rag_query(monkeypatch, capsys):
+    class FakeGraph:
+        def invoke(self, payload):  # noqa: ANN001
+            return {
+                "rag_query": "课堂演示遇到 NameError ...",
+                "error_type": "NameError",
+                "parsed_slots": {"knowledge_points": ["变量"]},
+                "rag_evidence": [],
+                "final_response": "ok",
+                "debug_trace": [
+                    {"node_name": "fetch_rag_evidence", "output_summary": {"validation_ok": True, "mapper": "m"}}
+                ],
+            }
+
+    import scripts.smoke_test_real_rag as smoke_module
+
+    monkeypatch.setattr(smoke_module, "build_agent_graph", lambda: FakeGraph())
+    monkeypatch.setattr(smoke_module.sys, "argv", ["smoke_test_real_rag.py", "--force-remote"])
+    smoke_module.main()
+    out = capsys.readouterr().out
+    assert "rag_query=" in out

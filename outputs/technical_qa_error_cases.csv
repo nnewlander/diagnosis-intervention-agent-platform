@@ -1,17 +1,17 @@
 ﻿eval_id,case_id,request_text,expected_task,actual_primary_task,need_clarify,routing_mode,rag_hit_count,final_response,error_reason
-1,1,林同学 现在更需要补概念还是补练习？能顺带给出干预目标和动作吗？,technical_qa,intervention,True,task_based_routing,5,"我已先按“intervention”处理你的请求，并补充了次任务 ['dispatch'] 的结果。
+1,1,林同学 现在更需要补概念还是补练习？能顺带给出干预目标和动作吗？,technical_qa,intervention,True,task_based_routing,0,"我已先按“intervention”处理你的请求，并补充了次任务 ['dispatch'] 的结果。
 当前观察：当前学生画像或提交记录不足
 可能原因：关键证据缺失，暂无法定位稳定问题模式
 建议目标：先补全学生信息与近期作业证据，再制定个性化干预方案
 已推荐练习包 3 个。
 补充信息：
 - 检测到林同学对应多个学生，请补充 student_id。候选: ['STU-0002', 'STU-0009', 'STU-0039']
-- 请补充关注知识点，如 for循环、函数、字符串、异常处理。",technical_qa_need_clarify_true;technical_qa_not_short_path
+- 请补充关注知识点，如 for循环、函数、字符串、异常处理。",technical_qa_need_clarify_true;technical_qa_not_short_path;technical_qa_rag_miss
 15,15,周同学 这周在 列表推导式 和 代码运行 上比较不稳，能给我一个个性化干预方案吗？,technical_qa,technical_qa,True,task_based_routing,5,"问题判断：这是一个 常见运行错误 类问题。
 原因解释：通常表示变量或函数名在使用前未定义，或者命名与实际定义不一致。
 课堂讲法：先让学生定位报错行，再逐行检查变量是否先定义后使用。
 示例提醒：重点检查大小写、拼写和作用域（函数内外变量是否可见）。
-参考证据：FAQ-0270 - FAQ 问：代码运行 这节课的导入怎么讲更自然？ FAQ 答：建议先判断问题属于 平台使用 还是课堂组织问题，再结合对应示例或平台路径给出标准回答。若是高频问题",technical_qa_need_clarify_true;technical_qa_not_short_path
+参考证据：本地文档 - {'source_bundle_id': 'RAGREF-DOC-0115', 'original_record_id': 'DOC-0115', 'origi",technical_qa_need_clarify_true;technical_qa_not_short_path
 35,35,给 孙同学 下发一个围绕 range函数 的补练包，时长别太长，课堂前能做完最好。,technical_qa,dispatch,True,task_based_routing,5,"我已先按“dispatch”处理你的请求，并补充了次任务 [] 的结果。
 当前观察：当前学生画像或提交记录不足
 可能原因：关键证据缺失，暂无法定位稳定问题模式
@@ -19,77 +19,77 @@
 已推荐练习包 3 个。
 补充信息：
 - 检测到孙同学对应多个学生，请补充 student_id。候选: ['STU-0022', 'STU-0032', 'STU-0054']",technical_qa_need_clarify_true;technical_qa_not_short_path
-37,37,朱同学 课堂互动没问题，但作业里一直卡在 索引访问，先帮我做个学情判断。,technical_qa,diagnosis,True,task_based_routing,5,"我已先按“diagnosis”处理你的请求，并补充了次任务 [] 的结果。
+37,37,朱同学 课堂互动没问题，但作业里一直卡在 索引访问，先帮我做个学情判断。,technical_qa,diagnosis,True,task_based_routing,0,"我已先按“diagnosis”处理你的请求，并补充了次任务 [] 的结果。
 当前观察：当前学生画像或提交记录不足
 可能原因：关键证据缺失，暂无法定位稳定问题模式
 建议目标：先补全学生信息与近期作业证据，再制定个性化干预方案
 已推荐练习包 3 个。
 补充信息：
 - 检测到朱同学对应多个学生，请补充 student_id。候选: ['STU-0004', 'STU-0035', 'STU-0053']
-- 请补充关注知识点，如 for循环、函数、字符串、异常处理。",technical_qa_need_clarify_true;technical_qa_not_short_path
-47,47,王同学 课堂互动没问题，但作业里一直卡在 文件读写，先帮我做个学情判断。,technical_qa,diagnosis,True,task_based_routing,5,"我已先按“diagnosis”处理你的请求，并补充了次任务 [] 的结果。
+- 请补充关注知识点，如 for循环、函数、字符串、异常处理。",technical_qa_need_clarify_true;technical_qa_not_short_path;technical_qa_rag_miss
+47,47,王同学 课堂互动没问题，但作业里一直卡在 文件读写，先帮我做个学情判断。,technical_qa,diagnosis,True,task_based_routing,0,"我已先按“diagnosis”处理你的请求，并补充了次任务 [] 的结果。
 当前观察：当前学生画像或提交记录不足
 可能原因：关键证据缺失，暂无法定位稳定问题模式
 建议目标：先补全学生信息与近期作业证据，再制定个性化干预方案
 已推荐练习包 3 个。
 补充信息：
 - 检测到王同学对应多个学生，请补充 student_id。候选: ['STU-0020', 'STU-0045', 'STU-0056']
-- 请补充关注知识点，如 for循环、函数、字符串、异常处理。",technical_qa_need_clarify_true;technical_qa_not_short_path
-48,48,碰撞检测 这个点学生总混淆，想找一个更好讲的课堂说法。,technical_qa,unknown,False,task_based_routing,5,"我已先按“unknown”处理你的请求，并补充了次任务 [] 的结果。
+- 请补充关注知识点，如 for循环、函数、字符串、异常处理。",technical_qa_need_clarify_true;technical_qa_not_short_path;technical_qa_rag_miss
+48,48,碰撞检测 这个点学生总混淆，想找一个更好讲的课堂说法。,technical_qa,unknown,False,task_based_routing,0,"我已先按“unknown”处理你的请求，并补充了次任务 [] 的结果。
 当前观察：当前学生画像或提交记录不足
 可能原因：关键证据缺失，暂无法定位稳定问题模式
 建议目标：先补全学生信息与近期作业证据，再制定个性化干预方案
-已推荐练习包 3 个。",technical_qa_not_short_path
-55,55,课堂演示里又遇到 AttributeError，我该怎么给学生讲更顺？,technical_qa,unknown,False,task_based_routing,5,"我已先按“unknown”处理你的请求，并补充了次任务 [] 的结果。
+已推荐练习包 3 个。",technical_qa_not_short_path;technical_qa_rag_miss
+55,55,课堂演示里又遇到 AttributeError，我该怎么给学生讲更顺？,technical_qa,unknown,False,task_based_routing,0,"我已先按“unknown”处理你的请求，并补充了次任务 [] 的结果。
 当前观察：当前学生画像或提交记录不足
 可能原因：关键证据缺失，暂无法定位稳定问题模式
 建议目标：先补全学生信息与近期作业证据，再制定个性化干预方案
-已推荐练习包 3 个。",technical_qa_not_short_path
-56,56,刘同学 课堂互动没问题，但作业里一直卡在 作品提交，先帮我做个学情判断。,technical_qa,diagnosis,True,task_based_routing,5,"我已先按“diagnosis”处理你的请求，并补充了次任务 [] 的结果。
+已推荐练习包 3 个。",technical_qa_not_short_path;technical_qa_rag_miss
+56,56,刘同学 课堂互动没问题，但作业里一直卡在 作品提交，先帮我做个学情判断。,technical_qa,diagnosis,True,task_based_routing,0,"我已先按“diagnosis”处理你的请求，并补充了次任务 [] 的结果。
 当前观察：当前学生画像或提交记录不足
 可能原因：关键证据缺失，暂无法定位稳定问题模式
 建议目标：先补全学生信息与近期作业证据，再制定个性化干预方案
 已推荐练习包 3 个。
 补充信息：
 - 检测到刘同学对应多个学生，请补充 student_id。候选: ['STU-0003', 'STU-0055', 'STU-0070']
-- 请补充关注知识点，如 for循环、函数、字符串、异常处理。",technical_qa_need_clarify_true;technical_qa_not_short_path
-57,57,陈同学 这周在 随机数 和 课程导入 上比较不稳，能给我一个个性化干预方案吗？,technical_qa,intervention,True,task_based_routing,5,"我已先按“intervention”处理你的请求，并补充了次任务 [] 的结果。
+- 请补充关注知识点，如 for循环、函数、字符串、异常处理。",technical_qa_need_clarify_true;technical_qa_not_short_path;technical_qa_rag_miss
+57,57,陈同学 这周在 随机数 和 课程导入 上比较不稳，能给我一个个性化干预方案吗？,technical_qa,intervention,True,task_based_routing,0,"我已先按“intervention”处理你的请求，并补充了次任务 [] 的结果。
 当前观察：当前学生画像或提交记录不足
 可能原因：关键证据缺失，暂无法定位稳定问题模式
 建议目标：先补全学生信息与近期作业证据，再制定个性化干预方案
 已推荐练习包 3 个。
 补充信息：
 - 检测到陈同学对应多个学生，请补充 student_id。候选: ['STU-0034', 'STU-0049', 'STU-0071']
-- 请补充关注知识点，如 for循环、函数、字符串、异常处理。",technical_qa_need_clarify_true;technical_qa_not_short_path
-59,59,胡同学 现在更需要补概念还是补练习？能顺带给出干预目标和动作吗？,technical_qa,intervention,True,task_based_routing,5,"我已先按“intervention”处理你的请求，并补充了次任务 ['dispatch'] 的结果。
+- 请补充关注知识点，如 for循环、函数、字符串、异常处理。",technical_qa_need_clarify_true;technical_qa_not_short_path;technical_qa_rag_miss
+59,59,胡同学 现在更需要补概念还是补练习？能顺带给出干预目标和动作吗？,technical_qa,intervention,True,task_based_routing,0,"我已先按“intervention”处理你的请求，并补充了次任务 ['dispatch'] 的结果。
 当前观察：当前学生画像或提交记录不足
 可能原因：关键证据缺失，暂无法定位稳定问题模式
 建议目标：先补全学生信息与近期作业证据，再制定个性化干预方案
 已推荐练习包 3 个。
 补充信息：
 - 检测到胡同学对应多个学生，请补充 student_id。候选: ['STU-0013', 'STU-0030', 'STU-0042']
-- 请补充关注知识点，如 for循环、函数、字符串、异常处理。",technical_qa_need_clarify_true;technical_qa_not_short_path
-63,63,郭同学 现在更需要补概念还是补练习？能顺带给出干预目标和动作吗？,technical_qa,intervention,True,task_based_routing,5,"我已先按“intervention”处理你的请求，并补充了次任务 ['dispatch'] 的结果。
+- 请补充关注知识点，如 for循环、函数、字符串、异常处理。",technical_qa_need_clarify_true;technical_qa_not_short_path;technical_qa_rag_miss
+63,63,郭同学 现在更需要补概念还是补练习？能顺带给出干预目标和动作吗？,technical_qa,intervention,True,task_based_routing,0,"我已先按“intervention”处理你的请求，并补充了次任务 ['dispatch'] 的结果。
 当前观察：当前学生画像或提交记录不足
 可能原因：关键证据缺失，暂无法定位稳定问题模式
 建议目标：先补全学生信息与近期作业证据，再制定个性化干预方案
 已推荐练习包 3 个。
 补充信息：
 - 检测到郭同学对应多个学生，请补充 student_id。候选: ['STU-0016', 'STU-0050', 'STU-0075']
-- 请补充关注知识点，如 for循环、函数、字符串、异常处理。",technical_qa_need_clarify_true;technical_qa_not_short_path
-65,65,张同学 现在更需要补概念还是补练习？能顺带给出干预目标和动作吗？,technical_qa,intervention,True,task_based_routing,5,"我已先按“intervention”处理你的请求，并补充了次任务 ['dispatch'] 的结果。
+- 请补充关注知识点，如 for循环、函数、字符串、异常处理。",technical_qa_need_clarify_true;technical_qa_not_short_path;technical_qa_rag_miss
+65,65,张同学 现在更需要补概念还是补练习？能顺带给出干预目标和动作吗？,technical_qa,intervention,True,task_based_routing,0,"我已先按“intervention”处理你的请求，并补充了次任务 ['dispatch'] 的结果。
 当前观察：当前学生画像或提交记录不足
 可能原因：关键证据缺失，暂无法定位稳定问题模式
 建议目标：先补全学生信息与近期作业证据，再制定个性化干预方案
 已推荐练习包 3 个。
 补充信息：
 - 检测到张同学对应多个学生，请补充 student_id。候选: ['STU-0012', 'STU-0026', 'STU-0028']
-- 请补充关注知识点，如 for循环、函数、字符串、异常处理。",technical_qa_need_clarify_true;technical_qa_not_short_path
-75,75,课件投屏 这个点学生总混淆，想找一个更好讲的课堂说法。,technical_qa,unknown,False,task_based_routing,5,"我已先按“unknown”处理你的请求，并补充了次任务 [] 的结果。
+- 请补充关注知识点，如 for循环、函数、字符串、异常处理。",technical_qa_need_clarify_true;technical_qa_not_short_path;technical_qa_rag_miss
+75,75,课件投屏 这个点学生总混淆，想找一个更好讲的课堂说法。,technical_qa,unknown,False,task_based_routing,0,"我已先按“unknown”处理你的请求，并补充了次任务 [] 的结果。
 当前观察：当前学生画像或提交记录不足
 可能原因：关键证据缺失，暂无法定位稳定问题模式
 建议目标：先补全学生信息与近期作业证据，再制定个性化干预方案
-已推荐练习包 3 个。",technical_qa_not_short_path
+已推荐练习包 3 个。",technical_qa_not_short_path;technical_qa_rag_miss
 77,77,杨同学 课堂互动没问题，但作业里一直卡在 函数定义，先帮我做个学情判断。,technical_qa,diagnosis,True,task_based_routing,5,"我已先按“diagnosis”处理你的请求，并补充了次任务 [] 的结果。
 当前观察：当前学生画像或提交记录不足
 可能原因：关键证据缺失，暂无法定位稳定问题模式
@@ -97,21 +97,21 @@
 已推荐练习包 3 个。
 补充信息：
 - 检测到杨同学对应多个学生，请补充 student_id。候选: ['STU-0001', 'STU-0041', 'STU-0051']",technical_qa_need_clarify_true;technical_qa_not_short_path
-79,79,老师端演示 路径处理 时总有人追问为什么会报 IndentationError。,technical_qa,unknown,False,task_based_routing,5,"我已先按“unknown”处理你的请求，并补充了次任务 [] 的结果。
+79,79,老师端演示 路径处理 时总有人追问为什么会报 IndentationError。,technical_qa,unknown,False,task_based_routing,0,"我已先按“unknown”处理你的请求，并补充了次任务 [] 的结果。
 当前观察：当前学生画像或提交记录不足
 可能原因：关键证据缺失，暂无法定位稳定问题模式
 建议目标：先补全学生信息与近期作业证据，再制定个性化干预方案
-已推荐练习包 3 个。",technical_qa_not_short_path
-88,88,张同学 现在更需要补概念还是补练习？能顺带给出干预目标和动作吗？,technical_qa,intervention,True,task_based_routing,5,"我已先按“intervention”处理你的请求，并补充了次任务 ['dispatch'] 的结果。
+已推荐练习包 3 个。",technical_qa_not_short_path;technical_qa_rag_miss
+88,88,张同学 现在更需要补概念还是补练习？能顺带给出干预目标和动作吗？,technical_qa,intervention,True,task_based_routing,0,"我已先按“intervention”处理你的请求，并补充了次任务 ['dispatch'] 的结果。
 当前观察：当前学生画像或提交记录不足
 可能原因：关键证据缺失，暂无法定位稳定问题模式
 建议目标：先补全学生信息与近期作业证据，再制定个性化干预方案
 已推荐练习包 3 个。
 补充信息：
 - 检测到张同学对应多个学生，请补充 student_id。候选: ['STU-0012', 'STU-0026', 'STU-0028']
-- 请补充关注知识点，如 for循环、函数、字符串、异常处理。",technical_qa_need_clarify_true;technical_qa_not_short_path
-89,89,坐标系 这个点学生总混淆，想找一个更好讲的课堂说法。,technical_qa,unknown,False,task_based_routing,5,"我已先按“unknown”处理你的请求，并补充了次任务 [] 的结果。
+- 请补充关注知识点，如 for循环、函数、字符串、异常处理。",technical_qa_need_clarify_true;technical_qa_not_short_path;technical_qa_rag_miss
+89,89,坐标系 这个点学生总混淆，想找一个更好讲的课堂说法。,technical_qa,unknown,False,task_based_routing,0,"我已先按“unknown”处理你的请求，并补充了次任务 [] 的结果。
 当前观察：当前学生画像或提交记录不足
 可能原因：关键证据缺失，暂无法定位稳定问题模式
 建议目标：先补全学生信息与近期作业证据，再制定个性化干预方案
-已推荐练习包 3 个。",technical_qa_not_short_path
+已推荐练习包 3 个。",technical_qa_not_short_path;technical_qa_rag_miss
