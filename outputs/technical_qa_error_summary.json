@@ -1,0 +1,103 @@
+{
+  "expected_technical_qa_but_actual_not_technical_qa": 11,
+  "technical_qa_need_clarify_true_count": 12,
+  "technical_qa_not_short_path_count": 12,
+  "high_frequency_request_keywords": [
+    {
+      "keyword": "现在更需要补概念",
+      "count": 5
+    },
+    {
+      "keyword": "还是补练习",
+      "count": 5
+    },
+    {
+      "keyword": "能顺带给出干预目",
+      "count": 5
+    },
+    {
+      "keyword": "标和动作吗",
+      "count": 5
+    },
+    {
+      "keyword": "这个点学生总混淆",
+      "count": 5
+    },
+    {
+      "keyword": "想找一个更好讲的",
+      "count": 5
+    },
+    {
+      "keyword": "课堂说法",
+      "count": 5
+    },
+    {
+      "keyword": "课堂互动没问题",
+      "count": 4
+    },
+    {
+      "keyword": "但作业里一直卡在",
+      "count": 4
+    },
+    {
+      "keyword": "先帮我做个学情判",
+      "count": 4
+    },
+    {
+      "keyword": "这周在",
+      "count": 2
+    },
+    {
+      "keyword": "上比较不稳",
+      "count": 2
+    },
+    {
+      "keyword": "能给我一个个性化",
+      "count": 2
+    },
+    {
+      "keyword": "干预方案吗",
+      "count": 2
+    },
+    {
+      "keyword": "张同学",
+      "count": 2
+    },
+    {
+      "keyword": "林同学",
+      "count": 1
+    },
+    {
+      "keyword": "周同学",
+      "count": 1
+    },
+    {
+      "keyword": "列表推导式",
+      "count": 1
+    },
+    {
+      "keyword": "代码运行",
+      "count": 1
+    },
+    {
+      "keyword": "数据类型",
+      "count": 1
+    }
+  ],
+  "top_error_reason_distribution": [
+    {
+      "error_reason": "technical_qa_rag_miss",
+      "count": 14
+    },
+    {
+      "error_reason": "technical_qa_need_clarify_true",
+      "count": 12
+    },
+    {
+      "error_reason": "technical_qa_not_short_path",
+      "count": 12
+    }
+  ],
+  "technical_qa_error_case_count": 17,
+  "routing_error_case_count": 51
+}

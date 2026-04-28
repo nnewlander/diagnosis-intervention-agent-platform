@@ -3,6 +3,8 @@ import json
 from pathlib import Path
 import sys
 from typing import Any
+from collections import Counter
+import re
 
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
@@ -142,6 +144,17 @@ def _safe_div(n: int | float, d: int | float) -> float | None:
     if d == 0:
         return None
     return n / d
+
+
+def _extract_keywords(texts: list[str], top_k: int = 20) -> list[dict[str, Any]]:
+    counter: Counter[str] = Counter()
+    stopwords = {"这个", "怎么", "学生", "老师", "课堂", "为什么", "一下", "一个", "我们", "你们"}
+    for text in texts:
+        for token in re.findall(r"[A-Za-z_][A-Za-z0-9_]+|[\u4e00-\u9fa5]{2,8}", text):
+            if token in stopwords:
+                continue
+            counter[token] += 1
+    return [{"keyword": k, "count": v} for k, v in counter.most_common(top_k)]
 
 
 def main() -> None:
@@ -413,6 +426,57 @@ def main() -> None:
         for row in routing_error_cases:
             writer.writerow(row)
 
+    # Build technical_qa error summary files.
+    technical_expected_but_not_primary = sum(
+        1
+        for r in routing_error_cases
+        if str(r.get("expected_task", "")) == "technical_qa"
+        and str(r.get("actual_primary_task", "")) != "technical_qa"
+    )
+    technical_need_clarify_true = sum(1 for r in technical_qa_error_cases if str(r.get("need_clarify")) == "True")
+    technical_not_short_path = sum(
+        1 for r in technical_qa_error_cases if str(r.get("routing_mode", "")) != "technical_qa_short_path"
+    )
+    error_reason_counter = Counter()
+    for r in technical_qa_error_cases:
+        for reason in str(r.get("error_reason", "")).split(";"):
+            reason = reason.strip()
+            if reason:
+                error_reason_counter[reason] += 1
+    keyword_stats = _extract_keywords([str(r.get("request_text", "")) for r in technical_qa_error_cases], top_k=20)
+
+    technical_summary = {
+        "expected_technical_qa_but_actual_not_technical_qa": technical_expected_but_not_primary,
+        "technical_qa_need_clarify_true_count": technical_need_clarify_true,
+        "technical_qa_not_short_path_count": technical_not_short_path,
+        "high_frequency_request_keywords": keyword_stats,
+        "top_error_reason_distribution": [
+            {"error_reason": k, "count": v} for k, v in error_reason_counter.most_common(20)
+        ],
+        "technical_qa_error_case_count": len(technical_qa_error_cases),
+        "routing_error_case_count": len(routing_error_cases),
+    }
+    summary_json = settings.output_dir_path / "technical_qa_error_summary.json"
+    summary_md = settings.output_dir_path / "technical_qa_error_summary.md"
+    summary_json.write_text(json.dumps(technical_summary, ensure_ascii=False, indent=2), encoding="utf-8")
+
+    md_lines = [
+        "# Technical QA Error Summary",
+        "",
+        f"- expected_task=technical_qa 但 actual_primary_task 非 technical_qa：{technical_expected_but_not_primary}",
+        f"- technical_qa 但 need_clarify=true：{technical_need_clarify_true}",
+        f"- technical_qa 但 routing_mode 非 technical_qa_short_path：{technical_not_short_path}",
+        "",
+        "## 高频 request_text 关键词",
+    ]
+    md_lines.extend([f"- {item['keyword']}: {item['count']}" for item in keyword_stats])
+    md_lines.append("")
+    md_lines.append("## Top error_reason 分布")
+    md_lines.extend(
+        [f"- {item['error_reason']}: {item['count']}" for item in technical_summary["top_error_reason_distribution"]]
+    )
+    summary_md.write_text("\n".join(md_lines), encoding="utf-8")
+
     print("[eval] 汇总结果：")
     for key, value in report.items():
         if key == "legacy":
@@ -423,6 +487,8 @@ def main() -> None:
     print(f"[eval] 详情文件: {detail_csv}")
     print(f"[eval] technical_qa 错误样本: {technical_qa_error_csv}")
     print(f"[eval] routing 错误样本: {routing_error_csv}")
+    print(f"[eval] technical_qa 错误摘要(JSON): {summary_json}")
+    print(f"[eval] technical_qa 错误摘要(MD): {summary_md}")
 
 
 if __name__ == "__main__":

@@ -19,7 +19,7 @@
 18,杨同学 课堂互动没问题，但作业里一直卡在 函数定义，先帮我做个学情判断。,,diagnosis,diagnosis,True,,True,task_based_routing,True,True,True,True,True
 19,这个孩子课堂上能听懂，但一写就错，想先判断问题在哪。,diagnosis,unknown,diagnosis,True,,False,task_based_routing,False,True,True,True,True
 20,何同学 最近在 字符串 上连续失分，能结合作业记录看看更像理解问题还是排查顺序问题？,diagnosis,unknown,diagnosis,True,,False,task_based_routing,True,True,True,True,True
-21,数据类型 这个点学生总混淆，想找一个更好讲的课堂说法。,,unknown,unknown,True,,False,task_based_routing,False,True,True,True,True
+21,数据类型 这个点学生总混淆，想找一个更好讲的课堂说法。,,technical_qa,technical_qa,False,technical_qa_rag_miss,False,technical_qa_short_path,False,False,False,True,False
 22,罗同学 现在更需要补概念还是补练习？能顺带给出干预目标和动作吗？,dispatch,intervention,dispatch,True,,True,task_based_routing,False,True,True,True,True
 23,刘同学 最近在 变量 上连续失分，能结合作业记录看看更像理解问题还是排查顺序问题？,intervention,unknown,intervention,True,,False,task_based_routing,False,True,True,True,True
 24,周同学 最近提交里老是报 资源找不到，想看下背后更像哪个知识点没掌握。,diagnosis,diagnosis,diagnosis,True,,True,task_based_routing,False,True,True,True,True
@@ -34,52 +34,52 @@
 33,吴同学 最近在 班级开课 上连续失分，能结合作业记录看看更像理解问题还是排查顺序问题？,,unknown,unknown,True,,False,task_based_routing,False,True,True,True,True
 34,杨同学 最近在 切片 上连续失分，能结合作业记录看看更像理解问题还是排查顺序问题？,intervention,unknown,intervention,True,,False,task_based_routing,False,True,True,True,True
 35,给 孙同学 下发一个围绕 range函数 的补练包，时长别太长，课堂前能做完最好。,technical_qa,dispatch,technical_qa,False,technical_qa_need_clarify_true;technical_qa_not_short_path,True,task_based_routing,True,True,True,True,True
-36,变量定义 这个点学生总混淆，想找一个更好讲的课堂说法。,,unknown,unknown,True,,False,task_based_routing,False,True,True,True,True
+36,变量定义 这个点学生总混淆，想找一个更好讲的课堂说法。,,technical_qa,technical_qa,False,technical_qa_rag_miss,False,technical_qa_short_path,False,False,False,True,False
 37,朱同学 课堂互动没问题，但作业里一直卡在 索引访问，先帮我做个学情判断。,technical_qa,diagnosis,technical_qa,False,technical_qa_need_clarify_true;technical_qa_not_short_path;technical_qa_rag_miss,True,task_based_routing,False,True,True,True,True
 38,我想给 徐同学 派发练习，再提醒家长关注，能一起生成执行建议吗？,dispatch,unknown,dispatch,True,,False,task_based_routing,False,True,True,True,True
 39,我想给 何同学 做一个 3 到 5 天的小干预，重点解决 文件读写，方案怎么安排更合理？,dispatch,intervention,dispatch,True,,True,task_based_routing,False,True,True,True,True
-40,函数返回值 这个点学生总混淆，想找一个更好讲的课堂说法。,,unknown,unknown,True,,False,task_based_routing,True,True,True,True,True
+40,函数返回值 这个点学生总混淆，想找一个更好讲的课堂说法。,,technical_qa,technical_qa,True,,False,technical_qa_short_path,True,False,False,True,False
 41,徐同学 课堂互动没问题，但作业里一直卡在 变量，先帮我做个学情判断。,dispatch,diagnosis,dispatch,True,,True,task_based_routing,False,True,True,True,True
 42,我想给 赵同学 做一个 3 到 5 天的小干预，重点解决 参数传递，方案怎么安排更合理？,intervention,intervention,intervention,True,,True,task_based_routing,False,True,True,True,True
-43,朱同学 最近提交里老是报 IndentationError，想看下背后更像哪个知识点没掌握。,intervention,diagnosis,intervention,True,,True,task_based_routing,False,True,True,True,True
+43,朱同学 最近提交里老是报 IndentationError，想看下背后更像哪个知识点没掌握。,intervention,diagnosis,intervention,True,,True,task_based_routing,True,True,True,True,True
 44,老师端演示 模块导入 时总有人追问为什么会报 资源找不到。,,unknown,unknown,True,,False,task_based_routing,False,True,True,True,True
 45,这个孩子课堂上能听懂，但一写就错，想先判断问题在哪。,,unknown,unknown,True,,False,task_based_routing,False,True,True,True,True
 46,课堂演示里又遇到 资源找不到，我该怎么给学生讲更顺？,intervention,unknown,intervention,True,,False,task_based_routing,False,True,True,True,True
 47,王同学 课堂互动没问题，但作业里一直卡在 文件读写，先帮我做个学情判断。,technical_qa,diagnosis,technical_qa,False,technical_qa_need_clarify_true;technical_qa_not_short_path;technical_qa_rag_miss,True,task_based_routing,False,True,True,True,True
-48,碰撞检测 这个点学生总混淆，想找一个更好讲的课堂说法。,technical_qa,unknown,technical_qa,False,technical_qa_not_short_path;technical_qa_rag_miss,False,task_based_routing,False,True,True,True,True
+48,碰撞检测 这个点学生总混淆，想找一个更好讲的课堂说法。,technical_qa,technical_qa,technical_qa,False,technical_qa_rag_miss,False,technical_qa_short_path,False,False,False,True,False
 49,课堂演示里又遇到 IndexError，我该怎么给学生讲更顺？,dispatch,technical_qa,dispatch,False,dispatch_packages_empty,False,technical_qa_short_path,True,False,False,True,False
 50,赵同学 课堂互动没问题，但作业里一直卡在 for循环，先帮我做个学情判断。,diagnosis,diagnosis,diagnosis,True,,True,task_based_routing,True,True,True,True,True
-51,孙同学 最近提交里老是报 IndentationError，想看下背后更像哪个知识点没掌握。,,diagnosis,diagnosis,True,,True,task_based_routing,False,True,True,True,True
+51,孙同学 最近提交里老是报 IndentationError，想看下背后更像哪个知识点没掌握。,,diagnosis,diagnosis,True,,True,task_based_routing,True,True,True,True,True
 52,给 陈同学 下发一个围绕 函数定义 的补练包，时长别太长，课堂前能做完最好。,intervention,dispatch,intervention,True,,True,task_based_routing,True,True,True,True,True
 53,罗同学 这周在 字符串处理 和 路径处理 上比较不稳，能给我一个个性化干预方案吗？,intervention,intervention,intervention,True,,True,task_based_routing,True,True,True,True,True
 54,老师端演示 键盘事件 时总有人追问为什么会报 IndexError。,diagnosis,technical_qa,diagnosis,False,diagnosis_empty,False,technical_qa_short_path,True,False,False,True,False
-55,课堂演示里又遇到 AttributeError，我该怎么给学生讲更顺？,technical_qa,unknown,technical_qa,False,technical_qa_not_short_path;technical_qa_rag_miss,False,task_based_routing,False,True,True,True,True
+55,课堂演示里又遇到 AttributeError，我该怎么给学生讲更顺？,technical_qa,technical_qa,technical_qa,True,,False,technical_qa_short_path,True,False,False,True,False
 56,刘同学 课堂互动没问题，但作业里一直卡在 作品提交，先帮我做个学情判断。,technical_qa,diagnosis,technical_qa,False,technical_qa_need_clarify_true;technical_qa_not_short_path;technical_qa_rag_miss,True,task_based_routing,False,True,True,True,True
 57,陈同学 这周在 随机数 和 课程导入 上比较不稳，能给我一个个性化干预方案吗？,technical_qa,intervention,technical_qa,False,technical_qa_need_clarify_true;technical_qa_not_short_path;technical_qa_rag_miss,True,task_based_routing,False,True,True,True,True
-58,杨同学 最近提交里老是报 AttributeError，想看下背后更像哪个知识点没掌握。,intervention,diagnosis,intervention,True,,True,task_based_routing,False,True,True,True,True
+58,杨同学 最近提交里老是报 AttributeError，想看下背后更像哪个知识点没掌握。,intervention,diagnosis,intervention,True,,True,task_based_routing,True,True,True,True,True
 59,胡同学 现在更需要补概念还是补练习？能顺带给出干预目标和动作吗？,technical_qa,intervention,technical_qa,False,technical_qa_need_clarify_true;technical_qa_not_short_path;technical_qa_rag_miss,True,task_based_routing,False,True,True,True,True
-60,列表操作 这个点学生总混淆，想找一个更好讲的课堂说法。,dispatch,unknown,dispatch,True,,False,task_based_routing,True,True,True,True,True
+60,列表操作 这个点学生总混淆，想找一个更好讲的课堂说法。,dispatch,technical_qa,dispatch,False,dispatch_packages_empty,False,technical_qa_short_path,True,False,False,True,False
 61,老师端演示 自动评测 时总有人追问为什么会报 ModuleNotFoundError。,technical_qa,technical_qa,technical_qa,True,,False,technical_qa_short_path,True,False,False,True,False
 62,课堂演示里又遇到 event loop写在while外，我该怎么给学生讲更顺？,intervention,unknown,intervention,True,,False,task_based_routing,False,True,True,True,True
 63,郭同学 现在更需要补概念还是补练习？能顺带给出干预目标和动作吗？,technical_qa,intervention,technical_qa,False,technical_qa_need_clarify_true;technical_qa_not_short_path;technical_qa_rag_miss,True,task_based_routing,False,True,True,True,True
 64,课堂演示里又遇到 NameError，我该怎么给学生讲更顺？,dispatch,technical_qa,dispatch,False,dispatch_packages_empty,False,technical_qa_short_path,True,False,False,True,False
 65,张同学 现在更需要补概念还是补练习？能顺带给出干预目标和动作吗？,technical_qa,intervention,technical_qa,False,technical_qa_need_clarify_true;technical_qa_not_short_path;technical_qa_rag_miss,True,task_based_routing,False,True,True,True,True
-66,陈同学 最近提交里老是报 AttributeError，想看下背后更像哪个知识点没掌握。,,diagnosis,diagnosis,True,,True,task_based_routing,False,True,True,True,True
-67,老师端演示 字符串处理 时总有人追问为什么会报 ZeroDivisionError。,dispatch,unknown,dispatch,True,,False,task_based_routing,True,True,True,True,True
+66,陈同学 最近提交里老是报 AttributeError，想看下背后更像哪个知识点没掌握。,,diagnosis,diagnosis,True,,True,task_based_routing,True,True,True,True,True
+67,老师端演示 字符串处理 时总有人追问为什么会报 ZeroDivisionError。,dispatch,technical_qa,dispatch,False,dispatch_packages_empty,False,technical_qa_short_path,True,False,False,True,False
 68,胡同学 课堂互动没问题，但作业里一直卡在 课件投屏，先帮我做个学情判断。,diagnosis,diagnosis,diagnosis,True,,True,task_based_routing,False,True,True,True,True
 69,这个孩子课堂上能听懂，但一写就错，想先判断问题在哪。,,unknown,unknown,True,,False,task_based_routing,False,True,True,True,True
 70,胡同学 课堂互动没问题，但作业里一直卡在 while循环，先帮我做个学情判断。,,diagnosis,diagnosis,True,,True,task_based_routing,True,True,True,True,True
 71,林同学 最近提交里老是报 KeyError，想看下背后更像哪个知识点没掌握。,diagnosis,diagnosis,diagnosis,True,,True,task_based_routing,True,True,True,True,True
-72,编码与UTF-8 这个点学生总混淆，想找一个更好讲的课堂说法。,dispatch,unknown,dispatch,True,,False,task_based_routing,False,True,True,True,True
+72,编码与UTF-8 这个点学生总混淆，想找一个更好讲的课堂说法。,dispatch,technical_qa,dispatch,False,dispatch_packages_empty,False,technical_qa_short_path,False,False,False,True,False
 73,张同学 这周在 range函数 和 字符串处理 上比较不稳，能给我一个个性化干预方案吗？,diagnosis,intervention,diagnosis,True,,True,task_based_routing,True,True,True,True,True
 74,我想给 徐同学 做一个 3 到 5 天的小干预，重点解决 Turtle绘图，方案怎么安排更合理？,intervention,intervention,intervention,True,,True,task_based_routing,False,True,True,True,True
-75,课件投屏 这个点学生总混淆，想找一个更好讲的课堂说法。,technical_qa,unknown,technical_qa,False,technical_qa_not_short_path;technical_qa_rag_miss,False,task_based_routing,False,True,True,True,True
+75,课件投屏 这个点学生总混淆，想找一个更好讲的课堂说法。,technical_qa,technical_qa,technical_qa,False,technical_qa_rag_miss,False,technical_qa_short_path,False,False,False,True,False
 76,罗同学 课堂互动没问题，但作业里一直卡在 字典操作，先帮我做个学情判断。,intervention,diagnosis,intervention,True,,True,task_based_routing,True,True,True,True,True
 77,杨同学 课堂互动没问题，但作业里一直卡在 函数定义，先帮我做个学情判断。,technical_qa,diagnosis,technical_qa,False,technical_qa_need_clarify_true;technical_qa_not_short_path,True,task_based_routing,True,True,True,True,True
-78,李同学 最近提交里老是报 ZeroDivisionError，想看下背后更像哪个知识点没掌握。,intervention,diagnosis,intervention,True,,True,task_based_routing,False,True,True,True,True
-79,老师端演示 路径处理 时总有人追问为什么会报 IndentationError。,technical_qa,unknown,technical_qa,False,technical_qa_not_short_path;technical_qa_rag_miss,False,task_based_routing,False,True,True,True,True
-80,老师端演示 列表 时总有人追问为什么会报 ZeroDivisionError。,dispatch,unknown,dispatch,True,,False,task_based_routing,True,True,True,True,True
-81,作品提交 这个点学生总混淆，想找一个更好讲的课堂说法。,diagnosis,unknown,diagnosis,True,,False,task_based_routing,False,True,True,True,True
+78,李同学 最近提交里老是报 ZeroDivisionError，想看下背后更像哪个知识点没掌握。,intervention,diagnosis,intervention,True,,True,task_based_routing,True,True,True,True,True
+79,老师端演示 路径处理 时总有人追问为什么会报 IndentationError。,technical_qa,technical_qa,technical_qa,True,,False,technical_qa_short_path,True,False,False,True,False
+80,老师端演示 列表 时总有人追问为什么会报 ZeroDivisionError。,dispatch,technical_qa,dispatch,False,dispatch_packages_empty,False,technical_qa_short_path,True,False,False,True,False
+81,作品提交 这个点学生总混淆，想找一个更好讲的课堂说法。,diagnosis,technical_qa,diagnosis,False,diagnosis_empty,False,technical_qa_short_path,False,False,False,True,False
 82,班里这几个学生在 课程设计 上都不稳，先推荐一个基础练习包给我。,diagnosis,unknown,diagnosis,True,,False,task_based_routing,False,True,True,True,True
 83,老师端演示 模块导入 时总有人追问为什么会报 数字转换失败。,,unknown,unknown,True,,False,task_based_routing,False,True,True,True,True
 84,我想给 张同学 派发练习，再提醒家长关注，能一起生成执行建议吗？,diagnosis,unknown,diagnosis,True,,False,task_based_routing,False,True,True,True,True
@@ -87,5 +87,5 @@
 86,我想给 张同学 做一个 3 到 5 天的小干预，重点解决 自动评测，方案怎么安排更合理？,,intervention,intervention,True,,True,task_based_routing,False,True,True,True,True
 87,课堂演示里又遇到 资源找不到，我该怎么给学生讲更顺？,diagnosis,unknown,diagnosis,True,,False,task_based_routing,False,True,True,True,True
 88,张同学 现在更需要补概念还是补练习？能顺带给出干预目标和动作吗？,technical_qa,intervention,technical_qa,False,technical_qa_need_clarify_true;technical_qa_not_short_path;technical_qa_rag_miss,True,task_based_routing,False,True,True,True,True
-89,坐标系 这个点学生总混淆，想找一个更好讲的课堂说法。,technical_qa,unknown,technical_qa,False,technical_qa_not_short_path;technical_qa_rag_miss,False,task_based_routing,False,True,True,True,True
+89,坐标系 这个点学生总混淆，想找一个更好讲的课堂说法。,technical_qa,technical_qa,technical_qa,False,technical_qa_rag_miss,False,technical_qa_short_path,False,False,False,True,False
 90,杨同学 这周在 报错排查 和 参数传递 上比较不稳，能给我一个个性化干预方案吗？,intervention,technical_qa,intervention,True,,True,task_based_routing,True,True,True,True,True

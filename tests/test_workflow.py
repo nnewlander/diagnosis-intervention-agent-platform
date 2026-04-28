@@ -17,6 +17,78 @@ def test_local_provider_mode_workflow_runs(monkeypatch):
     state = _run("请做学情诊断：student_id:STU-0001 最近几次作业表现如何？")
     assert state["primary_task_type"] == "diagnosis"
     assert "debug_trace" in state
+
+
+def test_sqlite_provider_mode_student_query_runs(monkeypatch):
+    db_path = build_local_sqlite()
+    monkeypatch.setattr(settings, "SQLITE_DB_PATH", str(db_path.relative_to(settings.PROJECT_ROOT)))
+    monkeypatch.setattr(settings, "STUDENT_DATA_PROVIDER", "sqlite")
+    state = _run("请诊断 student_id:STU-0001 的函数问题")
+    assert "mysql_evidence" in state
+    assert "profile_summary" in state["mysql_evidence"]
+
+
+def test_provider_switch_logic(monkeypatch):
+    monkeypatch.setattr(settings, "RAG_PROVIDER", "remote")
+    monkeypatch.setattr(settings, "KG_PROVIDER", "remote")
+    monkeypatch.setattr(settings, "STUDENT_DATA_PROVIDER", "local_csv_jsonl")
+    assert get_rag_adapter().provider_name == "remote"
+    assert get_kg_adapter().provider_name == "remote"
+    assert get_student_data_adapter().provider_name == "local_csv_jsonl"
+
+
+def test_nameerror_explain_should_be_technical_qa():
+    state = _run("课堂演示遇到 NameError，应该怎么给学生解释？")
+    assert state["primary_task_type"] == "technical_qa"
+    assert state["routing_mode"] == "technical_qa_short_path"
+    assert state["need_clarify"] is False
+
+
+def test_typical_error_case_pure_explain():
+    state = _run("这个报错是什么意思，学生问这个怎么解释？")
+    assert state["primary_task_type"] == "technical_qa"
+    assert state["need_clarify"] is False
+
+
+def test_typical_error_case_classroom_teaching():
+    state = _run("课堂上怎么讲这个异常，怎么带学生定位错误？")
+    assert state["primary_task_type"] == "technical_qa"
+    assert state["routing_mode"] == "technical_qa_short_path"
+
+
+def test_typical_error_case_low_age_explain():
+    state = _run("怎么解释给低龄学生，变量未定义怎么讲？")
+    assert state["primary_task_type"] == "technical_qa"
+
+
+def test_typical_error_case_runtime_fail():
+    state = _run("这段代码为什么跑不起来，运行失败怎么办？")
+    assert state["primary_task_type"] == "technical_qa"
+
+
+def test_with_student_context_should_not_be_pure_technical_qa():
+    state = _run("李同学最近几次作业一直报错，先帮我做诊断再给干预建议")
+    assert state["primary_task_type"] in {"diagnosis", "intervention"}
+    assert state["routing_mode"] == "task_based_routing"
+from app.core.config import settings
+from app.graph.workflow import build_agent_graph
+from app.tools.kg_adapter import get_kg_adapter
+from app.tools.rag_adapter import get_rag_adapter
+from app.tools.student_data_adapter import get_student_data_adapter
+from scripts.build_local_sqlite import build_local_sqlite
+
+
+def _run(request_text: str) -> dict:
+    return build_agent_graph().invoke({"request_text": request_text})
+
+
+def test_local_provider_mode_workflow_runs(monkeypatch):
+    monkeypatch.setattr(settings, "RAG_PROVIDER", "local")
+    monkeypatch.setattr(settings, "KG_PROVIDER", "local")
+    monkeypatch.setattr(settings, "STUDENT_DATA_PROVIDER", "local_csv_jsonl")
+    state = _run("请做学情诊断：student_id:STU-0001 最近几次作业表现如何？")
+    assert state["primary_task_type"] == "diagnosis"
+    assert "debug_trace" in state
     assert "evidence_summary" in state
 
 

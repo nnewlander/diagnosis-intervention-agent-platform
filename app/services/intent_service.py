@@ -31,6 +31,20 @@ TASK_KEYWORDS = {
         "变量未定义怎么讲",
         "函数未定义怎么讲",
         "学生问这个报错是什么意思",
+        "这个报错是什么意思",
+        "这段代码为什么跑不起来",
+        "为什么会出现这个错误",
+        "学生问这个怎么解释",
+        "低龄学生怎么理解",
+        "怎么带学生定位错误",
+        "怎么排查",
+        "运行失败怎么办",
+        "控制台提示",
+        "这个异常怎么讲",
+        "类型不匹配怎么讲",
+        "语法错误怎么讲",
+        "课堂说法",
+        "更好讲",
     ],
     "diagnosis": [
         "诊断",
@@ -66,6 +80,9 @@ ERROR_ALIASES = {
     "KeyError": ["KeyError"],
     "ValueError": ["ValueError"],
     "ModuleNotFoundError": ["ModuleNotFoundError"],
+    "AttributeError": ["AttributeError"],
+    "IndentationError": ["IndentationError"],
+    "ZeroDivisionError": ["ZeroDivisionError"],
 }
 
 ERROR_TO_WEAK_KP = {
@@ -153,8 +170,19 @@ def detect_task_types(text: str) -> list[str]:
     if error_type and "technical_qa" not in detected:
         detected.append("technical_qa")
 
-    # prioritize diagnosis when "诊断" exists in mixed wording like "李同学...帮我诊断"
-    if "diagnosis" in detected and "technical_qa" in detected and "诊断" in text:
+    has_student_context = bool(extract_student_mention(text)) or any(
+        k in text for k in ["这个学生", "这个孩子", "学情", "最近几次作业", "最近提交", "补练", "干预", "诊断"]
+    )
+    # avoid pure technical_qa when request clearly asks diagnosis/intervention/dispatch with student context.
+    if has_student_context and any(t in detected for t in ["diagnosis", "intervention", "dispatch"]):
+        # keep technical_qa as secondary in mixed only when explicit exception is present.
+        if "technical_qa" in detected and len(detected) > 1:
+            pass
+        elif "technical_qa" in detected and len(detected) == 1:
+            detected = ["diagnosis"]
+
+    # prioritize diagnosis when "诊断/学情/判断" exists in mixed wording.
+    if "diagnosis" in detected and "technical_qa" in detected and any(k in text for k in ["诊断", "学情", "判断"]):
         detected = ["diagnosis"] + [t for t in detected if t != "diagnosis"]
     return detected
 
