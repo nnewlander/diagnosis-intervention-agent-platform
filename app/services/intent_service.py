@@ -62,6 +62,7 @@ TASK_KEYWORDS = {
 }
 
 KNOWLEDGE_POINT_ALIASES = {
+    "变量定义": ["变量定义", "变量", "命名"],
     "for循环": ["for循环", "循环", "循环结构"],
     "条件判断": ["条件判断", "if", "分支判断"],
     "函数": ["函数", "方法", "函数定义"],
@@ -133,6 +134,16 @@ def parse_knowledge_points(text: str, error_type: str = "") -> list[str]:
     return found
 
 
+def parse_user_mentioned_knowledge_points(text: str) -> list[str]:
+    """Extract only explicitly mentioned knowledge points from user text."""
+    found: list[str] = []
+    text_lower = text.lower()
+    for canonical, aliases in KNOWLEDGE_POINT_ALIASES.items():
+        if any(alias.lower() in text_lower for alias in aliases):
+            found.append(canonical)
+    return found
+
+
 def parse_desired_days(text: str) -> int:
     match = re.search(r"(\d+)\s*天", text)
     if match:
@@ -199,6 +210,7 @@ def detect_task_type(text: str) -> str:
 def parse_request_slots(text: str) -> dict[str, Any]:
     task_types = detect_task_types(text)
     error_type = parse_error_type(text)
+    user_mentioned_points = parse_user_mentioned_knowledge_points(text)
     knowledge_points = parse_knowledge_points(text, error_type=error_type)
     task_type = "mixed" if len(task_types) > 1 else (task_types[0] if task_types else "unknown")
     return {
@@ -207,6 +219,7 @@ def parse_request_slots(text: str) -> dict[str, Any]:
         "student_id": parse_student_id(text),
         "class_id": parse_class_id(text),
         "knowledge_points": knowledge_points,
+        "user_mentioned_knowledge_points": user_mentioned_points,
         "desired_days": parse_desired_days(text),
         "error_type": error_type,
         "task_priority": parse_task_priority(text),

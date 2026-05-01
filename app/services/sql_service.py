@@ -33,7 +33,49 @@ class StudentEvidenceService:
                 }
         return {}
 
-    def build_student_evidence(self, student_id: str) -> dict[str, Any]:
+    @staticmethod
+    def _build_alignment(
+        user_mentioned_points: list[str],
+        submissions: list[dict[str, Any]],
+        weak_points: list[str],
+    ) -> dict[str, Any]:
+        normalized_user = [str(x).strip() for x in user_mentioned_points if str(x).strip()]
+        if not normalized_user:
+            return {
+                "matched_user_mentioned_points": [],
+                "unmatched_user_mentioned_points": [],
+                "data_weak_points": weak_points[:5],
+                "evidence_alignment_status": "insufficient_data",
+            }
+        submission_points = {str(x.get("knowledge_point", "")).strip() for x in submissions if x.get("knowledge_point")}
+        weak_set = {str(x).strip() for x in weak_points if str(x).strip()}
+        matched: list[str] = []
+        unmatched: list[str] = []
+        for kp in normalized_user:
+            if kp in submission_points or kp in weak_set:
+                matched.append(kp)
+            else:
+                unmatched.append(kp)
+        if not submission_points and not weak_set:
+            status = "insufficient_data"
+        elif len(matched) == len(normalized_user):
+            status = "aligned"
+        elif matched:
+            status = "partially_aligned"
+        else:
+            status = "mismatched"
+        return {
+            "matched_user_mentioned_points": matched,
+            "unmatched_user_mentioned_points": unmatched,
+            "data_weak_points": weak_points[:5],
+            "evidence_alignment_status": status,
+        }
+
+    def build_student_evidence(
+        self,
+        student_id: str,
+        user_mentioned_points: list[str] | None = None,
+    ) -> dict[str, Any]:
         if not student_id:
             return {
                 "profile_summary": {},
@@ -41,6 +83,12 @@ class StudentEvidenceService:
                 "weak_point_summary": {"weak_knowledge_points": [], "mastery_level": ""},
                 "recent_error_summary": {"error_distribution": {}},
                 "intervention_feedback_summary": {},
+                "alignment_summary": {
+                    "matched_user_mentioned_points": [],
+                    "unmatched_user_mentioned_points": [],
+                    "data_weak_points": [],
+                    "evidence_alignment_status": "insufficient_data",
+                },
             }
 
         profile = self.store.get_student_profile(student_id)
@@ -62,6 +110,8 @@ class StudentEvidenceService:
             }
             for item in submissions[: settings.MAX_SUBMISSIONS]
         ]
+        weak_points = mastery.get("weak_knowledge_points", [])[:5]
+        alignment = self._build_alignment(user_mentioned_points or [], compact_submissions, weak_points)
 
         return {
             "profile_summary": {
@@ -76,7 +126,7 @@ class StudentEvidenceService:
                 "submissions": compact_submissions,
             },
             "weak_point_summary": {
-                "weak_knowledge_points": mastery.get("weak_knowledge_points", [])[:5],
+                "weak_knowledge_points": weak_points,
                 "mastery_level": mastery.get("mastery_level", ""),
                 "class_attention_note": _truncate_text(mastery.get("class_attention_note", ""), 120),
             },
@@ -85,4 +135,5 @@ class StudentEvidenceService:
                 "recent_error_types": mastery.get("recent_error_types", [])[:5],
             },
             "intervention_feedback_summary": feedback,
+            "alignment_summary": alignment,
         }

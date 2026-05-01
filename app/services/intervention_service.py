@@ -1,6 +1,15 @@
 from typing import Any
 
 
+def _clean_text(text: str) -> str:
+    cleaned = str(text or "")
+    cleaned = cleaned.replace("。。", "。").replace("；；", "；").replace("，，", "，")
+    cleaned = "\n".join(" ".join(line.split()) for line in cleaned.split("\n"))
+    while "\n\n\n" in cleaned:
+        cleaned = cleaned.replace("\n\n\n", "\n\n")
+    return cleaned.strip()
+
+
 def build_intervention_plan(
     diagnosis: dict[str, Any],
     knowledge_points: list[str],
@@ -29,4 +38,7 @@ def build_intervention_plan(
         plan["day_3_action"] = "组织错题复盘与迁移训练，要求学生口述排查步骤。"
     if has_case:
         plan["case_hint"] = "已参考历史干预案例进行动作编排。"
+    for k, v in list(plan.items()):
+        if isinstance(v, str):
+            plan[k] = _clean_text(v)
     return plan

@@ -24,8 +24,15 @@ class LocalCSVJSONLStudentDataAdapter(BaseStudentDataAdapter):
     def resolve_student(self, student_id: str, student_mention: str) -> dict[str, Any]:
         return self.resolver.resolve(student_id=student_id, student_mention=student_mention)
 
-    def load_student_evidence(self, student_id: str) -> dict[str, Any]:
-        return self.evidence_service.build_student_evidence(student_id=student_id)
+    def load_student_evidence(
+        self,
+        student_id: str,
+        user_mentioned_points: list[str] | None = None,
+    ) -> dict[str, Any]:
+        return self.evidence_service.build_student_evidence(
+            student_id=student_id,
+            user_mentioned_points=user_mentioned_points or [],
+        )
 
     def get_intervention_cases(self, limit: int) -> list[dict[str, Any]]:
         return self.store.intervention_cases[:limit]
@@ -79,7 +86,11 @@ class SQLiteStudentDataAdapter(BaseStudentDataAdapter):
             "clarify_message": "未定位到学生，请提供 student_id。",
         }
 
-    def load_student_evidence(self, student_id: str) -> dict[str, Any]:
+    def load_student_evidence(
+        self,
+        student_id: str,
+        user_mentioned_points: list[str] | None = None,
+    ) -> dict[str, Any]:
         if not student_id:
             return {
                 "profile_summary": {},
@@ -87,6 +98,12 @@ class SQLiteStudentDataAdapter(BaseStudentDataAdapter):
                 "weak_point_summary": {"weak_knowledge_points": [], "mastery_level": ""},
                 "recent_error_summary": {"error_distribution": {}},
                 "intervention_feedback_summary": {},
+                "alignment_summary": {
+                    "matched_user_mentioned_points": [],
+                    "unmatched_user_mentioned_points": user_mentioned_points or [],
+                    "data_weak_points": [],
+                    "evidence_alignment_status": "insufficient_data",
+                },
             }
         with self._connect() as conn:
             cur = conn.cursor()
@@ -144,6 +161,23 @@ class SQLiteStudentDataAdapter(BaseStudentDataAdapter):
             key = item.get("error_type") or "unknown"
             error_dist[key] = error_dist.get(key, 0) + 1
 
+        weak_points = weak_points[:5]
+        user_points = [str(x).strip() for x in (user_mentioned_points or []) if str(x).strip()]
+        submission_points = {str(item.get("knowledge_point", "")).strip() for item in submissions if item.get("knowledge_point")}
+        weak_set = {str(x).strip() for x in weak_points if str(x).strip()}
+        matched = [kp for kp in user_points if kp in submission_points or kp in weak_set]
+        unmatched = [kp for kp in user_points if kp not in matched]
+        if not submission_points and not weak_set:
+            align_status = "insufficient_data"
+        elif user_points and len(matched) == len(user_points):
+            align_status = "aligned"
+        elif matched:
+            align_status = "partially_aligned"
+        elif user_points:
+            align_status = "mismatched"
+        else:
+            align_status = "insufficient_data"
+
         return {
             "profile_summary": {
                 "student_id": profile.get("student_id", ""),
@@ -154,7 +188,7 @@ class SQLiteStudentDataAdapter(BaseStudentDataAdapter):
             },
             "recent_submission_summary": {"total": len(submissions), "submissions": submissions},
             "weak_point_summary": {
-                "weak_knowledge_points": weak_points[:5],
+                "weak_knowledge_points": weak_points,
                 "mastery_level": mastery_level,
                 "class_attention_note": class_note[:120],
             },
@@ -163,6 +197,12 @@ class SQLiteStudentDataAdapter(BaseStudentDataAdapter):
                 "recent_error_types": recent_error_types[:5],
             },
             "intervention_feedback_summary": feedback,
+            "alignment_summary": {
+                "matched_user_mentioned_points": matched,
+                "unmatched_user_mentioned_points": unmatched,
+                "data_weak_points": weak_points,
+                "evidence_alignment_status": align_status,
+            },
         }
 
     def get_intervention_cases(self, limit: int) -> list[dict[str, Any]]:
@@ -200,7 +240,11 @@ class MySQLStudentDataAdapter(BaseStudentDataAdapter):
             "clarify_message": "MySQL provider 占位实现，请补充真实连接逻辑。",
         }
 
-    def load_student_evidence(self, student_id: str) -> dict[str, Any]:
+    def load_student_evidence(
+        self,
+        student_id: str,
+        user_mentioned_points: list[str] | None = None,
+    ) -> dict[str, Any]:
         # TODO: implement MySQL query pipeline for profile/submissions/mastery/feedback.
         return {
             "profile_summary": {},
@@ -211,6 +255,12 @@ class MySQLStudentDataAdapter(BaseStudentDataAdapter):
                 "note": "mysql provider placeholder",
                 "mysql_host": settings.MYSQL_HOST,
                 "mysql_db": settings.MYSQL_DB,
+            },
+            "alignment_summary": {
+                "matched_user_mentioned_points": [],
+                "unmatched_user_mentioned_points": user_mentioned_points or [],
+                "data_weak_points": [],
+                "evidence_alignment_status": "insufficient_data",
             },
         }
 

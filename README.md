@@ -132,6 +132,29 @@ streamlit run frontend/app.py
 - 健康检查：`GET http://127.0.0.1:8000/health`
 - Agent 接口：`POST http://127.0.0.1:8000/agent/run`
 
+## 前端演示启动方式（RAG + KG 远程）
+
+面试演示建议按以下顺序启动：
+
+1. 启动项目二 RAG 服务（确保可访问 `http://127.0.0.1:8001/health` 与 `/search`）。
+2. 启动项目三 KG 服务（确保可访问 `http://127.0.0.1:8002/health` 与 `/graph_query`）。
+3. 启动项目一 API：
+
+```bash
+python scripts/run_api.py
+```
+
+4. 启动 Streamlit 前端：
+
+```bash
+streamlit run frontend/app.py
+```
+
+说明：
+
+- 前端会按分区展示输入、总览、RAG/KG 证据、学情数据、诊断、干预、推荐练习和 debug_trace。
+- 若要演示真实远程联调，请先在 `.env` 设置 `RAG_PROVIDER=remote`、`KG_PROVIDER=remote` 及对应 API 地址。
+
 ## 调试能力（debug_trace）
 
 LangGraph 每个节点都会写入 `debug_trace`，每条记录包含：

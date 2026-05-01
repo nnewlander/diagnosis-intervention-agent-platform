@@ -9,6 +9,7 @@ class AgentState(TypedDict, total=False):
     student_id: str
     class_id: str
     knowledge_points: list[str]
+    user_mentioned_knowledge_points: list[str]
     desired_days: int
     error_type: str
     task_priority: str

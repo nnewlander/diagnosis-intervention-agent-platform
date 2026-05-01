@@ -12,6 +12,59 @@ from app.tools.rag_adapter import get_rag_adapter
 from app.tools.student_data_adapter import get_student_data_adapter
 
 
+PLAN_KEYWORDS = ["干预", "计划", "3天", "练习", "下发", "推荐"]
+
+
+def _text_has_point(text: str, point: str) -> bool:
+    if not text or not point:
+        return False
+    return point in text
+
+
+def _extract_supported_points_from_rag(points: list[str], rag_items: list[dict[str, Any]]) -> list[str]:
+    supported: list[str] = []
+    for p in points:
+        for item in rag_items:
+            text = " ".join(
+                [
+                    str(item.get("title", "")),
+                    str(item.get("snippet", "")),
+                    str(item.get("source_id", "")),
+                ]
+            )
+            if _text_has_point(text, p):
+                supported.append(p)
+                break
+    return list(dict.fromkeys(supported))
+
+
+def _extract_supported_points_from_kg(points: list[str], kg_items: list[dict[str, Any]]) -> list[str]:
+    supported: list[str] = []
+    for p in points:
+        for item in kg_items:
+            text = " ".join(
+                [
+                    str(item.get("entity", "")),
+                    str(item.get("relation", "")),
+                    str(item.get("target", "")),
+                    str(item.get("evidence", "")),
+                ]
+            )
+            if _text_has_point(text, p):
+                supported.append(p)
+                break
+    return list(dict.fromkeys(supported))
+
+
+def _clean_response_text(text: str) -> str:
+    cleaned = text.replace("。。", "。").replace("；；", "；")
+    # collapse duplicated spaces but keep line breaks
+    cleaned = "\n".join(" ".join(line.split()) for line in cleaned.split("\n"))
+    while "\n\n\n" in cleaned:
+        cleaned = cleaned.replace("\n\n\n", "\n\n")
+    return cleaned.strip()
+
+
 def _provider_meta() -> dict[str, str]:
     return {
         "rag_provider": settings.RAG_PROVIDER,
@@ -50,6 +103,7 @@ def parse_request(state: AgentState) -> AgentState:
     state["student_id"] = slots.get("student_id", "")
     state["class_id"] = slots.get("class_id", "")
     state["knowledge_points"] = slots.get("knowledge_points", [])
+    state["user_mentioned_knowledge_points"] = slots.get("user_mentioned_knowledge_points", [])
     state["desired_days"] = slots.get("desired_days", 0)
     state["error_type"] = slots.get("error_type", "")
     state["task_priority"] = slots.get("task_priority", "medium")
@@ -185,11 +239,50 @@ def fetch_kg_evidence(state: AgentState) -> AgentState:
     if not entity_terms:
         entity_terms = [request_text]
     kg_query = " ".join([p for p in [request_text, error_type] + knowledge_points if p]).strip()
-    kg = kg_adapter.search(
-        query=kg_query or request_text,
-        keywords=entity_terms,
-        top_k=settings.TOP_K_KG,
-    )
+    # Multi-point query: try each user-mentioned point for better coverage, then merge deduplicated results.
+    user_points = state.get("user_mentioned_knowledge_points", []) or []
+    if len(user_points) > 1:
+        merged: list[dict[str, Any]] = []
+        seen: set[tuple[str, str, str]] = set()
+        per_point_results: list[list[dict[str, Any]]] = []
+        for point in user_points:
+            point_query = f"{request_text} {point}".strip()
+            point_keywords = [point]
+            if error_type:
+                point_keywords.append(error_type)
+            part = kg_adapter.search(
+                query=point_query,
+                keywords=point_keywords,
+                top_k=settings.TOP_K_KG,
+            )
+            per_point_results.append(part)
+        # round-robin merge to avoid first point occupying all top_k slots
+        max_len = max((len(x) for x in per_point_results), default=0)
+        for idx in range(max_len):
+            for part in per_point_results:
+                if idx >= len(part):
+                    continue
+                item = part[idx]
+                sig = (
+                    str(item.get("entity", "")),
+                    str(item.get("relation", "")),
+                    str(item.get("target", "")),
+                )
+                if sig in seen:
+                    continue
+                seen.add(sig)
+                merged.append(item)
+                if len(merged) >= settings.TOP_K_KG:
+                    break
+            if len(merged) >= settings.TOP_K_KG:
+                break
+        kg = merged[: settings.TOP_K_KG]
+    else:
+        kg = kg_adapter.search(
+            query=kg_query or request_text,
+            keywords=entity_terms,
+            top_k=settings.TOP_K_KG,
+        )
     state["kg_evidence"] = kg
     kg_status = getattr(kg_adapter, "last_status", {})
     first = kg[0] if kg else {}
@@ -218,7 +311,11 @@ def fetch_kg_evidence(state: AgentState) -> AgentState:
 def fetch_mysql_evidence(state: AgentState) -> AgentState:
     student_adapter = get_student_data_adapter()
     student_id = state.get("student_id", "")
-    mysql = student_adapter.load_student_evidence(student_id=student_id)
+    user_points = state.get("user_mentioned_knowledge_points", []) or state.get("knowledge_points", [])
+    mysql = student_adapter.load_student_evidence(
+        student_id=student_id,
+        user_mentioned_points=user_points,
+    )
     state["mysql_evidence"] = mysql
     _append_trace(
         state,
@@ -238,6 +335,8 @@ def generate_diagnosis(state: AgentState) -> AgentState:
     diagnosis = build_diagnosis(
         mysql_evidence=state.get("mysql_evidence", {}),
         kg_evidence=state.get("kg_evidence", []),
+        rag_evidence=state.get("rag_evidence", []),
+        user_mentioned_points=state.get("user_mentioned_knowledge_points", []),
     )
     state["diagnosis"] = diagnosis
     _append_trace(
@@ -250,7 +349,23 @@ def generate_diagnosis(state: AgentState) -> AgentState:
     return state
 
 
+def _need_action_plan(state: AgentState) -> bool:
+    text = state.get("request_text", "")
+    return any(k in text for k in PLAN_KEYWORDS)
+
+
 def generate_intervention(state: AgentState) -> AgentState:
+    if state.get("primary_task_type") == "diagnosis" and not _need_action_plan(state):
+        state["intervention_case_evidence"] = []
+        state["intervention_plan"] = {}
+        _append_trace(
+            state,
+            node_name="generate_intervention",
+            input_summary={"desired_days": state.get("desired_days", 0)},
+            output_summary={"plan_mode": "skipped_for_diagnosis_only", "case_count": 0},
+            selected_tools=["intervention_rule_engine_v2"],
+        )
+        return state
     student_adapter = get_student_data_adapter()
     cases = student_adapter.get_intervention_cases(limit=3)
     state["intervention_case_evidence"] = cases
@@ -272,6 +387,16 @@ def generate_intervention(state: AgentState) -> AgentState:
 
 
 def recommend_package(state: AgentState) -> AgentState:
+    if state.get("primary_task_type") == "diagnosis" and not _need_action_plan(state):
+        state["recommended_packages"] = []
+        _append_trace(
+            state,
+            node_name="recommend_package",
+            input_summary={"grade_band": "", "difficulty_level": ""},
+            output_summary={"recommended_count": 0, "mode": "skipped_for_diagnosis_only"},
+            selected_tools=["package_adapter.recommend"],
+        )
+        return state
     profile_summary = state.get("mysql_evidence", {}).get("profile_summary", {})
     grade_band = profile_summary.get("grade_band", "")
     difficulty = "基础" if state.get("task_priority") != "high" else "提升"
@@ -296,23 +421,31 @@ def _build_evidence_summary(state: AgentState) -> dict[str, Any]:
     kg_items = state.get("kg_evidence", [])
     mysql = state.get("mysql_evidence", {})
     case_items = state.get("intervention_case_evidence", [])
+    user_points = state.get("user_mentioned_knowledge_points", []) or state.get("knowledge_points", [])
+    alignment = mysql.get("alignment_summary", {}) if isinstance(mysql, dict) else {}
+    student_supported_points = alignment.get("matched_user_mentioned_points", []) if isinstance(alignment, dict) else []
+    rag_supported_points = _extract_supported_points_from_rag(user_points, rag_items)
+    kg_supported_points = _extract_supported_points_from_kg(user_points, kg_items)
     return {
         "rag_summary": {
             "hit_count": len(rag_items),
             "provider": settings.RAG_PROVIDER,
             "schema": "RAGEvidenceItem",
             "preview": rag_items[:2],
+            "rag_supported_points": rag_supported_points,
         },
         "kg_summary": {
             "hit_count": len(kg_items),
             "provider": settings.KG_PROVIDER,
             "schema": "KGEvidenceItem",
             "preview": kg_items[:2],
+            "kg_supported_points": kg_supported_points,
         },
         "mysql_summary": {
             "provider": settings.STUDENT_DATA_PROVIDER,
             "schema": "StudentEvidenceBundle",
             "evidence": mysql,
+            "student_data_supported_points": student_supported_points,
         },
         "intervention_case_summary": {
             "provider": settings.STUDENT_DATA_PROVIDER,
@@ -334,27 +467,97 @@ def build_final_response(state: AgentState) -> AgentState:
     if state.get("primary_task_type") == "technical_qa":
         error_type = state.get("error_type", "") or "常见运行错误"
         rag_items = state.get("rag_evidence", [])
-        rag_hint = ""
+        kg_items = state.get("kg_evidence", [])
+        rag_ref = "-"
         if rag_items:
             first = rag_items[0]
-            rag_hint = f"\n参考证据：{first.get('title', '')} - {first.get('snippet', '')[:80]}"
+            rag_ref = str(first.get("source_id") or first.get("title") or "-")
+        kg_ref = "-"
+        if kg_items:
+            kg_best = None
+            kg_related = None
+            for item in kg_items:
+                relation = str(item.get("relation") or "")
+                if relation == "HAS_SOLUTION" and kg_best is None:
+                    kg_best = item
+                if relation == "RELATED_ERROR" and kg_related is None:
+                    kg_related = item
+            selected = kg_best or kg_related or kg_items[0]
+            kg_ref = (
+                f"{selected.get('entity', '-')}"
+                f" -> {selected.get('relation', '-')}"
+                f" -> {selected.get('target', '-')}"
+            )
         state["final_response"] = (
-            f"问题判断：这是一个 {error_type} 类问题。\n"
-            "原因解释：通常表示变量或函数名在使用前未定义，或者命名与实际定义不一致。\n"
-            "课堂讲法：先让学生定位报错行，再逐行检查变量是否先定义后使用。\n"
-            "示例提醒：重点检查大小写、拼写和作用域（函数内外变量是否可见）。"
-            f"{rag_hint}"
+            f"问题判断：这是一个 {error_type} 类问题，可以理解为“程序找不到这个名字”。\n\n"
+            "原因解释：NameError 通常表示变量或函数名在使用前未定义，或者命名与实际定义不一致。\n\n"
+            "课堂讲法：\n"
+            "1. 可以先告诉学生：你在代码里喊了一个名字，但电脑还不知道这个名字是谁；\n"
+            "2. 让学生定位报错行，找到报错的变量名或函数名；\n"
+            "3. 检查它是否先定义后使用；\n"
+            "4. 再检查大小写、拼写和作用域。\n\n"
+            "参考证据：\n"
+            f"- RAG: {rag_ref}\n"
+            f"- KG: {kg_ref}"
         )
     else:
-        state["final_response"] = (
-            f"我已先按“{state.get('primary_task_type', 'unknown')}”处理你的请求，"
-            f"并补充了次任务 {state.get('secondary_task_types', [])} 的结果。\n"
-            f"当前观察：{diagnosis.get('observed_problem', '暂无明确观察')}\n"
-            f"可能原因：{diagnosis.get('probable_cause', '暂无明确原因')}\n"
-            f"建议目标：{plan.get('intervention_goal', '请先补齐关键信息')}\n"
-            f"已推荐练习包 {len(state.get('recommended_packages', []))} 个。"
-            f"{clarify_lines}"
-        )
+        if state.get("primary_task_type") == "diagnosis":
+            basis = diagnosis.get("evidence_basis", {}) if isinstance(diagnosis, dict) else {}
+            focus = "、".join(basis.get("user_mentioned_knowledge_points", [])[:3]) or "当前关注知识点"
+            matched = "、".join(basis.get("matched_user_mentioned_points", [])[:3]) or "暂无直接命中"
+            unmatched = "、".join(basis.get("unmatched_user_mentioned_points", [])[:3]) or "无"
+            weak = "、".join(basis.get("data_weak_points", [])[:3]) or "暂无"
+            rag_supported = "、".join(
+                state.get("evidence_summary", {}).get("rag_summary", {}).get("rag_supported_points", [])[:3]
+            ) or "无明显直接命中"
+            kg_supported = "、".join(
+                state.get("evidence_summary", {}).get("kg_summary", {}).get("kg_supported_points", [])[:3]
+            ) or "无明显直接命中"
+            is_mixed_intervention = "intervention" in state.get("secondary_task_types", [])
+            plan_lines = ""
+            if is_mixed_intervention and isinstance(plan, dict) and plan:
+                plan_lines = (
+                    "\n\n3天干预建议：\n"
+                    f"- 第1天：{plan.get('day_1_action', '围绕核心知识点做错因讲解与最小复现。')}\n"
+                    f"- 第2天：{plan.get('day_2_action', '安排分层练习并现场反馈。')}\n"
+                    f"- 第3天：{plan.get('day_3_action', '组织错题复盘与迁移训练。')}\n"
+                )
+            boundary_reminder = ""
+            if basis.get("evidence_alignment_status") in {"mismatched", "insufficient_data"}:
+                boundary_reminder = (
+                    "\n证据边界提醒：\n"
+                    f"当前学情记录未直接命中 {unmatched}，本建议主要基于教师描述和 RAG/KG 补充证据生成，"
+                    "建议后续补充对应作业记录后复核。"
+                )
+            state["final_response"] = (
+                "诊断结论：\n"
+                f"该学生本次主要需要关注“{focus}”。\n\n"
+                "证据说明：\n"
+                f"- 用户描述中明确提到 {focus}；\n"
+                f"- 学情记录中直接命中：{matched}；\n"
+                f"- RAG 证据当前主要支持：{rag_supported}；\n"
+                f"- KG 证据当前主要支持：{kg_supported}；\n"
+                f"- 学情记录未直接支持：{unmatched}。\n"
+                f"- 系统额外发现历史弱点还包括：{weak}。\n\n"
+                "可能原因：\n"
+                f"{diagnosis.get('probable_cause', '概念理解与排错路径仍不稳定。')}\n\n"
+                "建议：\n"
+                f"{diagnosis.get('brief_suggestion', '建议先围绕变量定义做错因复盘，再用逐行跟踪方式讲解 for循环变量变化。')}"
+                f"{plan_lines}"
+                f"{boundary_reminder}"
+                f"{clarify_lines}"
+            )
+        else:
+            state["final_response"] = (
+                f"我已先按“{state.get('primary_task_type', 'unknown')}”处理你的请求，"
+                f"并补充了次任务 {state.get('secondary_task_types', [])} 的结果。\n"
+                f"当前观察：{diagnosis.get('observed_problem', '暂无明确观察')}\n"
+                f"可能原因：{diagnosis.get('probable_cause', '暂无明确原因')}\n"
+                f"建议目标：{plan.get('intervention_goal', '请先补齐关键信息')}\n"
+                f"已推荐练习包 {len(state.get('recommended_packages', []))} 个。"
+                f"{clarify_lines}"
+            )
+    state["final_response"] = _clean_response_text(str(state.get("final_response", "")))
     _append_trace(
         state,
         node_name="build_final_response",

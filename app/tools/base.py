@@ -26,7 +26,11 @@ class BaseStudentDataAdapter(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def load_student_evidence(self, student_id: str) -> dict[str, Any]:
+    def load_student_evidence(
+        self,
+        student_id: str,
+        user_mentioned_points: list[str] | None = None,
+    ) -> dict[str, Any]:
         raise NotImplementedError
 
     @abstractmethod
