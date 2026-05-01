@@ -24,9 +24,10 @@ class Settings(BaseSettings):
     RAG_TIMEOUT: int = 10
     RAG_RESPONSE_STYLE: str = "auto"
     KG_PROVIDER: str = "local"
-    KG_API_BASE: str = "http://127.0.0.1:9003"
+    KG_API_BASE: str = "http://127.0.0.1:8002"
+    KG_ENDPOINT: str = "/graph_query"
     KG_API_KEY: str = ""
-    KG_TIMEOUT: int = 15
+    KG_TIMEOUT: int = 10
     STUDENT_DATA_PROVIDER: str = "local_csv_jsonl"
     SQLITE_DB_PATH: str = "outputs/local_student_data.db"
     MYSQL_HOST: str = "127.0.0.1"

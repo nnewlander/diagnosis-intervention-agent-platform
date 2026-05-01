@@ -1,4 +1,5 @@
 from typing import Any
+from uuid import uuid4
 
 import requests
 
@@ -41,20 +42,30 @@ class RemoteKGAdapter(BaseKGAdapter):
     def __init__(self) -> None:
         self.mapper = KGResponseMapper()
         self.last_status = {"mapper": "KGResponseMapper", "validation_ok": True, "error": ""}
+        self.last_url = ""
 
     def search(self, query: str, keywords: list[str], top_k: int) -> list[dict[str, Any]]:
-        # HTTP API placeholder (future project3 integration endpoint).
+        # HTTP API integration for project3 evidence-only KG service.
         headers = {}
         if settings.KG_API_KEY:
             headers["Authorization"] = f"Bearer {settings.KG_API_KEY}"
-        payload = {"query": query, "keywords": keywords, "top_k": top_k}
+        endpoint = settings.KG_ENDPOINT if settings.KG_ENDPOINT.startswith("/") else f"/{settings.KG_ENDPOINT}"
+        request_url = f"{settings.KG_API_BASE.rstrip('/')}{endpoint}"
+        self.last_url = request_url
+        entity_terms = keywords[:] if keywords else []
+        payload = {
+            "query": query,
+            "entity_terms": entity_terms,
+            "top_k": top_k,
+            "request_id": f"kg-{uuid4().hex[:12]}",
+        }
         ok, error = validate_query_contract(payload)
         if not ok:
             self.last_status = {"mapper": "KGResponseMapper", "validation_ok": False, "error": error}
             return []
         try:
             response = requests.post(
-                f"{settings.KG_API_BASE}/graph_query",
+                request_url,
                 json=payload,
                 headers=headers,
                 timeout=settings.KG_TIMEOUT,

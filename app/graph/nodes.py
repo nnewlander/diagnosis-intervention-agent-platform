@@ -175,28 +175,40 @@ def fetch_rag_evidence(state: AgentState) -> AgentState:
 
 def fetch_kg_evidence(state: AgentState) -> AgentState:
     kg_adapter = get_kg_adapter()
-    keywords = state.get("knowledge_points", [])[:]
-    if state.get("error_type"):
-        keywords.append(state["error_type"])
-    if not keywords:
-        keywords = [state.get("request_text", "")]
+    request_text = state.get("request_text", "")
+    error_type = state.get("error_type", "")
+    knowledge_points = state.get("knowledge_points", [])[:]
+    entity_terms = []
+    if error_type:
+        entity_terms.append(error_type)
+    entity_terms.extend([kp for kp in knowledge_points if kp])
+    if not entity_terms:
+        entity_terms = [request_text]
+    kg_query = " ".join([p for p in [request_text, error_type] + knowledge_points if p]).strip()
     kg = kg_adapter.search(
-        query=state.get("request_text", ""),
-        keywords=keywords,
+        query=kg_query or request_text,
+        keywords=entity_terms,
         top_k=settings.TOP_K_KG,
     )
     state["kg_evidence"] = kg
     kg_status = getattr(kg_adapter, "last_status", {})
+    first = kg[0] if kg else {}
     _append_trace(
         state,
         node_name="fetch_kg_evidence",
-        input_summary={"keywords": keywords[:5]},
+        input_summary={"kg_query": kg_query, "entity_terms": entity_terms[:8]},
         output_summary={
-            "kg_hits": len(kg),
-            "provider": kg_adapter.provider_name,
-            "mapper": kg_status.get("mapper", ""),
+            "kg_provider": settings.KG_PROVIDER,
+            "kg_api_base": settings.KG_API_BASE,
+            "kg_query": kg_query,
+            "entity_terms": entity_terms[:8],
+            "evidence_count": len(kg),
+            "mapper_used": kg_status.get("mapper", ""),
             "validation_ok": kg_status.get("validation_ok", True),
             "validation_error": kg_status.get("error", ""),
+            "first_evidence_source": (first.get("metadata") or {}).get("source") if isinstance(first, dict) else "",
+            "first_evidence_entity": first.get("entity", "") if isinstance(first, dict) else "",
+            "first_evidence_relation": first.get("relation", "") if isinstance(first, dict) else "",
         },
         selected_tools=["kg_adapter.search"],
     )

@@ -7,6 +7,7 @@ class RemoteQueryContract(BaseModel):
     query: str
     top_k: int = 5
     keywords: list[str] = Field(default_factory=list)
+    entity_terms: list[str] = Field(default_factory=list)
     filters: dict[str, Any] = Field(default_factory=dict)
     request_id: str = ""
 
@@ -35,7 +36,10 @@ class RemoteKGOutputContract(BaseModel):
 
     @model_validator(mode="after")
     def ensure_any_result_field(self):
-        if not any([self.records, self.results, self.paths, self.items, self.data]):
+        # Allow empty lists (e.g., records=[]) as a valid response.
+        if not any(
+            field is not None for field in [self.records, self.results, self.paths, self.items, self.data]
+        ):
             raise ValueError("KG response must contain one of records/results/paths/items/data")
         return self
 

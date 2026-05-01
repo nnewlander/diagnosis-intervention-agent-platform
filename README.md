@@ -60,7 +60,8 @@
 - `RAG_TIMEOUT`: RAG 请求超时秒数（默认 10）
 - `RAG_RESPONSE_STYLE`: `auto`（自动识别 search/ask 风格）
 - `KG_PROVIDER`: `local|remote`
-- `KG_API_BASE`: 项目三 KG 服务地址
+- `KG_API_BASE`: 项目三 KG 服务地址（默认 `http://127.0.0.1:8002`；mock 常为 `9003`）
+- `KG_ENDPOINT`: 项目三 KG 检索端点（默认 `/graph_query`）
 - `KG_API_KEY`: 可选鉴权令牌
 - `KG_TIMEOUT`: KG 请求超时秒数
 - `STUDENT_DATA_PROVIDER`: `local_csv_jsonl|sqlite|mysql`
@@ -87,9 +88,10 @@ RAG_API_KEY=
 RAG_TIMEOUT=10
 RAG_RESPONSE_STYLE=auto
 KG_PROVIDER=local
-KG_API_BASE=http://127.0.0.1:9003
+KG_API_BASE=http://127.0.0.1:8002
+KG_ENDPOINT=/graph_query
 KG_API_KEY=
-KG_TIMEOUT=15
+KG_TIMEOUT=10
 STUDENT_DATA_PROVIDER=local_csv_jsonl
 SQLITE_DB_PATH=outputs/local_student_data.db
 MYSQL_HOST=127.0.0.1
@@ -98,6 +100,12 @@ MYSQL_USER=root
 MYSQL_PASSWORD=
 MYSQL_DB=teaching_agent
 ```
+
+**端口说明（避免真实 smoke 误连 mock）：**
+
+- **真实项目三 KG**默认应为 `KG_API_BASE=http://127.0.0.1:8002`（与 `app/core/config.py`、`.env.example` 一致）。
+- **本地 mock KG**（`python scripts/run_mock_kg.py`）默认监听 **`9003`**（可通过环境变量 `KG_MOCK_PORT` 修改）。
+- 若你的 `.env` 里仍是 `KG_API_BASE=http://127.0.0.1:9003`，它会**覆盖**代码默认值并导致 `scripts/smoke_test_real_kg.py` 打到 mock 而非项目三；请改为 `8002`，或使用脚本参数：`--kg-api-base http://127.0.0.1:8002`。
 
 ## 本地启动顺序
 
@@ -294,8 +302,8 @@ Mapper 层（`app/tools/response_mappers/`）负责：
 
 - 项目三（KG）：
   1. 设置 `KG_PROVIDER=remote`
-  2. 配置 `KG_API_BASE` 与可选 `KG_API_KEY`
-  3. 在 `RemoteKGAdapter.search` 对接真实 HTTP 或补齐 Neo4j/Cypher 查询实现
+  2. 配置 `KG_API_BASE`、`KG_ENDPOINT` 与可选 `KG_API_KEY`
+  3. `RemoteKGAdapter` 请求体固定包含 `query/entity_terms/top_k/request_id`
   4. 若字段变化，只改 `KGResponseMapper`，无需改 graph
 
 ## Mock Remote Services 启动
@@ -353,6 +361,60 @@ python scripts/smoke_test_real_rag.py --force-remote --auto-warmup --fail-on-fal
 - **端口不是 8001**：修改 `RAG_API_BASE` 为真实端口地址。
 - **`/search` 不存在**：修改 `RAG_ENDPOINT`，确保拼接后 URL 正确。
 - **返回字段无法识别**：检查 `RAGResponseMapper` 是否覆盖当前响应字段（如 `hits/results/items`）。
+
+## 真实项目三 KG 联调
+
+1) 先启动项目三 KG 服务（确保可访问 `POST /graph_query`）  
+2) 在项目一 `.env` 中配置：
+
+```env
+KG_PROVIDER=remote
+KG_API_BASE=http://127.0.0.1:8002
+KG_ENDPOINT=/graph_query
+KG_API_KEY=
+KG_TIMEOUT=10
+```
+
+3) 执行真实 KG smoke：
+
+```bash
+python scripts/smoke_test_real_kg.py --force-remote
+# 临时指定项目三地址（优先级高于 .env）
+python scripts/smoke_test_real_kg.py --force-remote --kg-api-base http://127.0.0.1:8002 --kg-endpoint /graph_query
+```
+
+脚本会先请求 `GET {KG_API_BASE}/health` 与 `GET {KG_API_BASE}/ready`，再调用 `POST /graph_query`。  
+若 `/health` 或 `/ready` 不可用，会提示「项目三 KG 服务可能未启动，或 KG_API_BASE 配置错误。」  
+启用 `--force-remote` 且 `KG_API_BASE` 仍指向 **9003** 时，会输出明显 warning，提示这不是真实项目三默认端口 **8002**。  
+输出包含：`health_ok` / `ready_ok` / `ready_payload` / `neo4j_connected` / `graph_node_count` / `graph_relation_count`、`evidence_count`、`validation_ok`、`mapper_used`；若 `evidence_count=0` 会 warning 但不会崩溃。
+
+## 真实 RAG + KG 联合 smoke
+
+同时配置 `.env`：
+
+```env
+RAG_PROVIDER=remote
+RAG_API_BASE=http://127.0.0.1:8001
+RAG_ENDPOINT=/search
+KG_PROVIDER=remote
+KG_API_BASE=http://127.0.0.1:8002
+KG_ENDPOINT=/graph_query
+```
+
+执行：
+
+```bash
+python scripts/smoke_test_real_rag_kg.py
+python scripts/smoke_test_real_rag_kg.py --rag-api-base http://127.0.0.1:8001 --kg-api-base http://127.0.0.1:8002
+```
+
+推荐（先探测 RAG `/health` `/ready`，按需 `/warmup`，并在命中 RAG fallback 时失败退出）：
+
+```bash
+python scripts/smoke_test_real_rag_kg.py --rag-api-base http://127.0.0.1:8001 --kg-api-base http://127.0.0.1:8002 --auto-warmup-rag --fail-on-rag-fallback
+```
+
+脚本会打印 `effective_rag_api_base` / `effective_kg_api_base`；对 **RAG** 执行 `/health`、`/ready`（输出 `rag_serving_mode`、`rag_faq_ready`、`rag_bm25_ready`、`rag_lightweight_search_ready`、文档计数等），在 `--auto-warmup-rag` 且索引未就绪时调用 **`GET /warmup`** 并再次 `/ready`；对 **KG** 执行 `/health`、`/ready` 探测。随后执行 workflow，输出 **`rag_query` / `original_request_text` / `parsed_error_type` / `parsed_knowledge_points`**、RAG top3（含 `metadata.route` / `metadata.fallback`）、KG top3、`final_response_non_empty`、`debug_trace` 中的 provider 以及 `kg_validation_ok` / `kg_mapper_used`。若 RAG top1 为 fallback 且传入 **`--fail-on-rag-fallback`**，脚本以退出码 **1** 结束。
 
 ## SQLite 初始化步骤
 
