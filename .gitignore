@@ -1,0 +1,3 @@
+
+finetune_lora/outputs/*
+!finetune_lora/outputs/.gitkeep

@@ -1,0 +1,29 @@
+# LoRA / training defaults for finetune_lora（可被 train_lora.py 与环境变量覆盖）
+
+base_model_env: BASE_MODEL
+default_base_model: Qwen/Qwen2.5-0.5B-Instruct
+
+lora:
+  r: 8
+  lora_alpha: 16
+  lora_dropout: 0.05
+  bias: none
+  task_type: CAUSAL_LM
+  target_modules:
+    - q_proj
+    - k_proj
+    - v_proj
+    - o_proj
+
+training:
+  output_dir: outputs/lora_adapter
+  # 以下为 YAML 参考值；CLI train_lora.py 自带更适合 6～8GB 显存的默认值（见脚本 --help）
+  num_train_epochs: 2
+  per_device_train_batch_size: 1
+  gradient_accumulation_steps: 8
+  learning_rate: 2.0000e-4
+  warmup_steps: 10
+  logging_steps: 5
+  save_strategy: epoch
+  fp16: true
+  max_length: 512
