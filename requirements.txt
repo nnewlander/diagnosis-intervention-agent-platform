@@ -1,3 +1,7 @@
+# PyTorch CUDA 12.6：与整份依赖一起安装时用 extra-index-url（其余包仍走 PyPI）。
+# 若只重装 PyTorch，可执行：pip3 install torch torchvision --index-url https://download.pytorch.org/whl/cu126
+--extra-index-url https://download.pytorch.org/whl/cu126
+
 fastapi>=0.111.0
 uvicorn>=0.30.0
 streamlit>=1.37.0
@@ -13,3 +17,4 @@ datasets>=2.20.0
 accelerate>=1.0.0
 pyyaml>=6.0
 torch>=2.1.0
+torchvision>=0.16.0
