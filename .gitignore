@@ -1,3 +1,11 @@
 
 finetune_lora/outputs/*
 !finetune_lora/outputs/.gitkeep
+
+cloud_artifacts/
+*.tar.gz
+finetune_lora/outputs/*
+!finetune_lora/outputs/.gitkeep
+*.safetensors
+checkpoint-*/
+
