@@ -1,0 +1,39 @@
+{
+  "base_url": "http://127.0.0.1:8008/v1",
+  "base_model": "qwen2.5-14b-instruct",
+  "lora_model": "teaching_lora",
+  "timeout_sec": 120.0,
+  "models_ok": true,
+  "available_models": [
+    "qwen2.5-14b-instruct",
+    "teaching_lora"
+  ],
+  "models_http_status": 200,
+  "base_model_chat": {
+    "http_status": 200,
+    "request_ok": true,
+    "model": "qwen2.5-14b-instruct",
+    "latency_ms": 5027.47,
+    "finish_reason": "stop",
+    "response_non_empty": true,
+    "json_parse_ok": true,
+    "has_diagnosis": true,
+    "has_intervention_plan": true,
+    "response_preview": "{\n    \"诊断\": {\n        \"for循环问题\": \"可能是因为对循环变量的初始化、条件判断或更新步骤理解不清晰。\",\n        \"条件判断问题\": \"可能是逻辑判断错误，或者对布尔表达式的使用不够熟练。\"\n    },\n    \"3天干预建议\": [\n        {\n            \"第1天\": \"复习基础语法：重新学习for循环和if语句的基础知识，确保理解每个部分的作用。可以通过在线教程或编程书籍进行复习。\"\n        },\n        {\n            \"第2天\": \"实践练习：编写一些简单的程序来练习for循环和条件判断，例如计算1到100的所有偶数之和，或者根据用户输入判断是否为质数。\"\n        },\n        {\n            \"第3天\": \"代码审查与调试：找一些已经完成的代码示例，尝试找出其中的f"
+  },
+  "lora_model_chat": {
+    "http_status": 200,
+    "request_ok": true,
+    "model": "teaching_lora",
+    "latency_ms": 3330.67,
+    "finish_reason": "stop",
+    "response_non_empty": true,
+    "json_parse_ok": true,
+    "has_diagnosis": true,
+    "has_intervention_plan": false,
+    "response_preview": "{\n    \"诊断\": \"李同学在for循环和条件判断上的错误可能源于对基本语法的不熟悉，或者是在特定情况下逻辑判断失误。\",\n    \"第1天\": \"第1天：复习for循环的基本结构和常见用法，完成相关练习题。\",\n    \"第2天\": \"第2天：学习if/else等条件语句，并通过对比练习加深理解。\",\n    \"第3天\": \"第3天：结合for循环与条件判断进行综合练习，巩固所学知识。\"\n}"
+  },
+  "service_reachable": true,
+  "user_message": "",
+  "smoke_prompt": "李同学最近在 for循环和条件判断上一直出错，帮我先诊断一下，再给一个3天干预建议。请只输出 JSON。"
+}
